@@ -20,11 +20,15 @@
     var CONFIG = {"hostname":"timesea05.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Blog of Avalanche">
+  <meta name="description" content="About myself 👋 Hi, I’m @TimeSea05, now I am a undergraduate student in University of Chinese Academy of Sciences, majoring Computer Science and Technology. 👀 I’m interested in system programming, fu">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Blog of TimeSea05">
 <meta property="og:url" content="http://timesea05.github.io/index.html">
-<meta property="og:site_name" content="Blog of Avalanche">
+<meta property="og:site_name" content="Blog of TimeSea05">
+<meta property="og:description" content="About myself 👋 Hi, I’m @TimeSea05, now I am a undergraduate student in University of Chinese Academy of Sciences, majoring Computer Science and Technology. 👀 I’m interested in system programming, fu">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-01-02T12:44:39.743Z">
+<meta property="article:modified_time" content="2023-01-02T12:44:39.743Z">
 <meta property="article:author" content="TimeSea05">
 <meta name="twitter:card" content="summary">
 
@@ -35,13 +39,14 @@
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
+    isHome : false,
     isPost : false,
     lang   : 'en'
   };
 </script>
 
-  <title>Blog of Avalanche</title>
+  <title> | Blog of TimeSea05
+</title>
   
 
 
@@ -92,7 +97,7 @@
 
     <a href="/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Blog of Avalanche</h1>
+      <h1 class="site-title">Blog of TimeSea05</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
   </div>
@@ -138,296 +143,56 @@
       <div class="main-inner">
         <div class="content-wrap">
           
+  
+  
 
-          <div class="content index posts-expand">
+          <div class="content page posts-expand">
             
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/02/leetcode-strange-runtime-error/">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="TimeSea05">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Blog of Avalanche">
-    </span>
+    
+    
+    
+    <div class="post-block" lang="en">
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/01/02/leetcode-strange-runtime-error/" class="post-title-link" itemprop="url">Leetcode: strange runtime error</a>
-        </h2>
 
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
+<h1 class="post-title" itemprop="name headline">
+</h1>
 
-              <time title="Created: 2023-01-02 19:43:12 / Modified: 20:11:31" itemprop="dateCreated datePublished" datetime="2023-01-02T19:43:12+08:00">2023-01-02</time>
-            </span>
+<div class="post-meta">
+  
 
-          
+</div>
 
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
+</header>
 
       
-          <p>向Leetcode <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/can-place-flowers/">435：种花问题</a> 提交答案时，Leetcode平台出现了诡异的runtime error：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Line 1034: Char 34: runtime error: addition of unsigned offset to 0x602000000a50 overflowed to 0x602000000a4c (stl_vector.h)</span><br><span class="line">SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/bin/../lib/gcc/x86_64-linux-gnu/9/../../../../include/c++/9/bits/stl_vector.h:1043:34</span><br></pre></td></tr></table></figure>
-<p>测试用例如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[0,1,0]</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
-<p>提交的源代码如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">canPlaceFlowers</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; flowerbed, <span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> placed = <span class="number">0</span>;</span><br><span class="line">  <span class="type">bool</span> canPlace = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; flowerbed.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (flowerbed[i] == <span class="number">0</span>) &#123;</span><br><span class="line">      canPlace = <span class="literal">false</span>;</span><br><span class="line">      <span class="keyword">if</span> (flowerbed.<span class="built_in">size</span>() == <span class="number">1</span>) &#123;</span><br><span class="line">        canPlace = <span class="literal">true</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">0</span> &amp;&amp; flowerbed[i+<span class="number">1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">        canPlace = <span class="literal">true</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (i == flowerbed.<span class="built_in">size</span>() - <span class="number">1</span> &amp;&amp; flowerbed[i<span class="number">-1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">        canPlace = <span class="literal">true</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (flowerbed[i<span class="number">-1</span>] == <span class="number">0</span> &amp;&amp; flowerbed[i+<span class="number">1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">        canPlace = <span class="literal">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (canPlace) &#123;</span><br><span class="line">        flowerbed[i] = <span class="number">1</span>;</span><br><span class="line">        placed++;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; </span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> placed &gt;= n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>实际上这个代码已经修改过一遍了，但是还是出现了runtime error，在本地用g++编译输出正确答案，没有出现runtime error。</p>
-<p>Google一下错误日志后发现，可能是vscode的C++插件对代码的检查不严格，于是换用Visual Studio运行该代码，果然出现了错误：</p>
-<p><a target="_blank" rel="noopener" href="https://imgloc.com/i/t2ZiV"><img src="https://i.328888.xyz/2023/01/02/t2ZiV.png" alt="t2ZiV.png" style="zoom: 80%;" /></a></p>
-<p>点击忽略，可以看到出现未处理的异常：</p>
-<p><img src="https://i.328888.xyz/2023/01/02/t2t3k.png" alt="t2t3k.png" style="zoom:80%;" /></p>
-<p>查看调用堆栈，找到出现异常的位置：</p>
-<p><img src="https://i.328888.xyz/2023/01/02/t2bK8.png" alt="t2bK8.png" style="zoom: 60%;" /></p>
-<p>可以看到程序停在第20行的位置，此时局部变量<code>i</code>的值为0，访问vector数组的索引为-1，由于vector的索引为无符号数，此时直接溢出，变成一个非常大的值，所以程序报错<code>addition of unsigned offset to 0x602000000a50 overflowed to 0x602000000a4c</code>，将程序重写后，错误消失，通过。重写后的程序如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">canPlaceFlowers</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; flowerbed, <span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> placed = <span class="number">0</span>;</span><br><span class="line">  <span class="type">bool</span> canPlace = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; flowerbed.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">    canPlace = <span class="literal">false</span>; </span><br><span class="line">    <span class="keyword">if</span> (flowerbed[i] == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (i == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (flowerbed.<span class="built_in">size</span>() == <span class="number">1</span>) &#123;</span><br><span class="line">          canPlace = <span class="literal">true</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (flowerbed[i+<span class="number">1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">          canPlace = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (i == flowerbed.<span class="built_in">size</span>() - <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (flowerbed[i<span class="number">-1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">          canPlace = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (flowerbed[i<span class="number">-1</span>] == <span class="number">0</span> &amp;&amp; flowerbed[i+<span class="number">1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">          canPlace = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (canPlace) &#123;</span><br><span class="line">        flowerbed[i] = <span class="number">1</span>;</span><br><span class="line">        placed++;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> placed &gt;= n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>重写后的代码多了好几重判断，显得非常啰嗦。实际上可以通过在数组两侧都加上一个0作为padding，来避免进行复杂的检查。</p>
-
       
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
       
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/02/loop-variable-captured-by-func-literal/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="TimeSea05">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Blog of Avalanche">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/01/02/loop-variable-captured-by-func-literal/" class="post-title-link" itemprop="url">Loop variable captured by func literal</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2023-01-02 19:34:44 / Modified: 19:39:05" itemprop="dateCreated datePublished" datetime="2023-01-02T19:34:44+08:00">2023-01-02</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>这几天在学习Go语言，一段代码让我感到百思不得其解。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;fmt&quot;</span></span><br><span class="line">  <span class="string">&quot;time&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> field <span class="keyword">struct</span> &#123;</span><br><span class="line">  name <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *field)</span></span> <span class="built_in">print</span>() &#123;</span><br><span class="line">  fmt.Println(p.name)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  data := []field&#123; &#123;<span class="string">&quot;one&quot;</span>&#125;, &#123;<span class="string">&quot;two&quot;</span>&#125;, &#123;<span class="string">&quot;three&quot;</span>&#125; &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> _, v := <span class="keyword">range</span> data &#123;</span><br><span class="line">      <span class="keyword">go</span> v.<span class="built_in">print</span>()</span><br><span class="line">  &#125;</span><br><span class="line">  time.Sleep(<span class="number">3</span> * time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">three</span><br><span class="line">three</span><br><span class="line">three</span><br></pre></td></tr></table></figure>
-<p>从表面来看，上面的代码中每循环一次创建一个协程，来打印结构体中的<code>name</code>字段。第一次循环，<code>v</code>的值为<code>&#123;&quot;one&quot;&#125;</code>，所以第一个创建的协程应该打印”one”，第二个协程应该打印”two”，以此类推。但多次运行该程序，输出结果始终只有”three”。这不太符合常理，于是我对代码进行了一些改动，在循环内部，为打印函数添加一个wrapper:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> data &#123;</span><br><span class="line">  <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    v.<span class="built_in">print</span>()</span><br><span class="line">  &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出结果还是相同，但此时编译器发出了警告：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">loop variable v captured by func literal</span><br></pre></td></tr></table></figure>
-<p>这句警告是什么意思我也没有搞懂。我想用其他的办法找出这个bug的源头。添加<code>--race</code>选项运行该程序，得到的结果如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">WARNING: DATA RACE</span><br><span class="line">Read at 0x00c00011a210 by goroutine 7:</span><br><span class="line">  main.main.func1()</span><br><span class="line">      /home/avalanche/dev/go/go-learn/main.go:18 +0x3a</span><br><span class="line"></span><br><span class="line">Previous write at 0x00c00011a210 by main goroutine:</span><br><span class="line">  main.main()</span><br><span class="line">      /home/avalanche/dev/go/go-learn/main.go:16 +0xd3</span><br><span class="line"></span><br><span class="line">Goroutine 7 (running) created at:</span><br><span class="line">  main.main()</span><br><span class="line">      /home/avalanche/dev/go/go-learn/main.go:17 +0x164</span><br></pre></td></tr></table></figure>
-<p>确实发生了数据竞争，但内存地址为0x00c00011a210处是哪一个变量无从知晓，猜测是<code>v</code>。但从数据竞争也无法从逻辑上推出程序的运行结果，作罢，求助于Google，找到了Stack Overflow上的一个<a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/21822527/why-golang-dont-iterate-correctly-in-my-for-loop-with-range">帖子</a>。</p>
-<p>高赞给出的解释是这样的：在循环中创建的这些goroutine中，<code>v</code>指向<code>for...range</code>循环中的循环变量<code>v</code>，也就是说，在这些goroutine运行的时候，v的值是<code>for...range</code>循环中的v，而不是这些goroutine创建时v的值。线程<code>main</code>的运行速度很快，在这些goroutine还没有运行起来的时候，循环遍历已经完成，所以在这些goroutine运行时，协程中的v全部指向最后一个循环变量，在这个例子中就是<code>&#123;&quot;three&quot;&#125;</code>。如果想要达到不同的线程输出不同值的效果，就要用传参的方式来创建这些goroutine：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _, v := <span class="keyword">range</span> data &#123;</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">(v field)</span></span> &#123;</span><br><span class="line">		v.<span class="built_in">print</span>()</span><br><span class="line">	&#125;(v)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>此时程序的输出结果为：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">three</span><br><span class="line">one</span><br><span class="line">two</span><br></pre></td></tr></table></figure>
-<p>而且多运行几次，每一次运行的结果都有可能不同。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/02/gopl-chpt4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="TimeSea05">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Blog of Avalanche">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/01/02/gopl-chpt4/" class="post-title-link" itemprop="url">Gopl Note: Chapter 4</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2023-01-02 19:20:18 / Modified: 19:39:56" itemprop="dateCreated datePublished" datetime="2023-01-02T19:20:18+08:00">2023-01-02</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="4-1-iota"><a href="#4-1-iota" class="headerlink" title="4.1 iota"></a>4.1 iota</h3><p>Iota is a useful concept for creating incrementing constants in Go.</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	USD = <span class="literal">iota</span></span><br><span class="line">	EUR</span><br><span class="line">	GBP</span><br><span class="line">	RMB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	symbol := [...]<span class="type">string</span>&#123;USD: <span class="string">&quot;$&quot;</span>, EUR: <span class="string">&quot;€&quot;</span>, GBP: <span class="string">&quot;￡&quot;</span>, RMB: <span class="string">&quot;￥&quot;</span>&#125;</span><br><span class="line">	fmt.Println(RMB, symbol[RMB])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>output:</p>
-<blockquote>
-<p>3 ￥</p>
-</blockquote>
-<h3 id="4-2-sha256算法"><a href="#4-2-sha256算法" class="headerlink" title="4.2 sha256算法"></a>4.2 sha256算法</h3><p>一个n位的哈希函数就是一个从任意长的消息到<code>n</code>位哈希值的映射，一个<code>n</code>位的加密哈希函数就是一个单向的、避免碰撞的n位哈希函数。这样的函数是目前在数字签名和密码保护当中极为重要的手段。当前比较流行的哈希函数主要有128位的MD4和MD5和160位的SHA-1，SHA-2族有着更多位的输出哈希值，破解难度更大，能够提高更高的安全性。</p>
-<p>对于任意长度的消息，SHA256都会产生一个256位的哈希值，称作消息摘要。这个摘要相当于是个长度为32个字节的数组，通常有一个长度为64的十六进制字符串来表示，其中1个字节=8位，一个十六进制的字符的长度为4位。</p>
-<p>计算”Blockchain”经过SHA256得到的哈希值：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;crypto/sha256&quot;</span></span><br><span class="line">	<span class="string">&quot;fmt&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	c1 := sha256.Sum256([]<span class="type">byte</span>(<span class="string">&quot;Blockchain&quot;</span>))</span><br><span class="line">	fmt.Printf(<span class="string">&quot;%x\n&quot;</span>, c1)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<blockquote>
-<p>625da44e4eaf58d61cf048d168aa6f5e492dea166d8bb54ec06c30de07db57e1</p>
-</blockquote>
-<p>总体上，HSA256与MD4、MD5以及HSA-1等哈希函数的操作流程类似，待哈希的消息在继续哈希计算之前首先要进行以下两个步骤：</p>
-<ul>
-<li>对消息进行补位处理，是的最终的长度是512位的倍数</li>
-<li>然后以512位为单位对消息进行分块为$M^{(1)}, M^{(2)}, …, M^{(N)}$</li>
+      <div class="post-body">
+          <h1 id="About-myself"><a href="#About-myself" class="headerlink" title="About myself"></a>About myself</h1><ul>
+<li>👋 Hi, I’m @TimeSea05, now I am a undergraduate student in University of Chinese Academy of Sciences, majoring Computer Science and Technology.</li>
+<li>👀 I’m interested in system programming, full stack developing(frontend: <strong>javascript</strong>; backend: <strong>golang</strong>)</li>
+<li>My current technology stack<ul>
+<li>C, system programming</li>
+<li>Javascipt(framework: react)</li>
+<li>Golang(framework: gin, gorm, fiber)</li>
+<li>Simple python, cpp</li>
 </ul>
-<p>将消息进行逐个处理：从一个固定的初始哈希$H^{(0)}$开始，进行以下序列的计算：</p>
-<script type="math/tex; mode=display">H^{(i)} = H^{(i-1)}+C_{M^{(i)}}(H^{(i-1)})</script><p>其中$C$是SHA256的压缩函数，$+$是$\rm mod \;2^{32}$加法，$H^{(N)}$是消息区块的哈希值</p>
-<p>详细内容请见：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/94619052">https://zhuanlan.zhihu.com/p/94619052</a></p>
-<h3 id="4-3-map操作"><a href="#4-3-map操作" class="headerlink" title="4.3 map操作"></a>4.3 map操作</h3><h4 id="4-3-1"><a href="#4-3-1" class="headerlink" title="4.3.1"></a>4.3.1</h4><p>删除map中的元素：使用内置<code>delete</code>函数</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">delete</span>(ages, <span class="string">&quot;Alice&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="4-3-2"><a href="#4-3-2" class="headerlink" title="4.3.2"></a>4.3.2</h4><p>要注意：map中的元素不是一个变量，因此不能对map的元素进行取指操作</p>
-<p>前几天遇到了一个bug：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> attr <span class="keyword">struct</span> &#123;</span><br><span class="line">	n    <span class="type">int</span></span><br><span class="line">	name <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	m := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]attr)</span><br><span class="line">	m[<span class="string">&quot;hello&quot;</span>].n++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>编译无法通过，提示<code>cannot assign to struct field m[&quot;hello&quot;].n in map</code>，错误类型为<code>UnaddressableFieldAssign</code></p>
-<p>查阅相关博客后，我才明白，在go语言中，赋值、自增这些对数据进行操作的语句，左值必须是可寻址的，<strong>但是map可能随着元素数量的增长而重新分配更大的内存空间，从而可能导致之前的地址无效</strong>，因此在这个例子中，<code>m[&quot;hello&quot;].n</code>是不可寻址的，所以无法对其使用自增语句。</p>
-<p>正确的做法是，先把map中的元素拷贝出来，将拷贝中的n变量自增1：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">m := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]attr)</span><br><span class="line"></span><br><span class="line">a := m[<span class="string">&quot;hello&quot;</span>]</span><br><span class="line">a.n++</span><br><span class="line">a.name = <span class="string">&quot;main.go&quot;</span></span><br><span class="line">m[<span class="string">&quot;hello&quot;</span>] = a</span><br><span class="line"></span><br><span class="line">fmt.Println(m[<span class="string">&quot;hello&quot;</span>])</span><br></pre></td></tr></table></figure>
-<p>输出为：</p>
-<blockquote>
-<p>{1 main.go}</p>
-</blockquote>
-<p>符合预期</p>
-<h4 id="4-3-3"><a href="#4-3-3" class="headerlink" title="4.3.3"></a>4.3.3</h4><p>Map的迭代顺序是不确定的，并且不同的哈希函数实现可能导致不同的遍历顺序。在实践中，遍历的顺序是随机的，每一次遍历的顺序都不相同。这是故意的，每次都使用随机的遍历顺序可以强制要求程序不会依赖具体的哈希函数实现。如果要按顺序遍历key/value对，我们必须显式地对key进行排序，可以使用sort包的Strings函数对字符串slice进行排序。</p>
-<h3 id="4-4-结构体匿名成员"><a href="#4-4-结构体匿名成员" class="headerlink" title="4.4  结构体匿名成员"></a>4.4  结构体匿名成员</h3><p>考虑以下两个结构体</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">type Point <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">	X, Y <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Circle <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">	point Point</span><br><span class="line">	radius <span class="type">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>如果要访问<code>Circle</code>结构体中的成员，那么需要按照以下规则去访问：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> c Circle</span><br><span class="line">c.point.X = <span class="number">8</span></span><br><span class="line">c.point.Y = <span class="number">8</span></span><br><span class="line">c.radius = <span class="number">5</span></span><br></pre></td></tr></table></figure>
-<p>如果结构体嵌套层数更多一些，那么访问结构体中的成员将会变得非常繁琐，Go语言有一个特性让我们只声明一个成员对应的数据类型而不指名成员的名字；这类成员就叫匿名成员。</p>
-<p>修改后的<code>Circle</code>结构体定义如下：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Circle <span class="keyword">struct</span> &#123;</span><br><span class="line">	Point</span><br><span class="line">	radius <span class="type">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>此时要访问<code>Circle</code> 结构体中的成员，那么无需再给出完整的路径：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> c Circle</span><br><span class="line">c.X = <span class="number">8</span></span><br><span class="line">c.Y = <span class="number">8</span></span><br><span class="line">c.radius = <span class="number">5</span></span><br></pre></td></tr></table></figure>
-<p>关于结构体匿名成员，有以下几个需要注意的点：</p>
-<ul>
-<li><p>一个结构体中不能有两个或者多个类型相同的匿名成员</p>
 </li>
-<li><p>结构体字面值必须遵循结构体类型声明时的结构，因此只有下面的字面值是合法的：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c = Circle&#123;Point&#123;<span class="number">8</span>, <span class="number">8</span>&#125;, <span class="number">5</span>&#125; <span class="comment">// valid</span></span><br><span class="line">c = Circle&#123;X:<span class="number">8</span>, Y:<span class="number">8</span>, radius: <span class="number">5</span>&#125; <span class="comment">// invalid</span></span><br><span class="line">c = Circle&#123;<span class="number">8</span>, <span class="number">8</span>, <span class="number">5</span>&#125; <span class="comment">// invalid</span></span><br></pre></td></tr></table></figure>
-</li>
+<li>🌱 I’m currently learning <em>The Go programming Language by Alan A. A. Donovan and Brian W. Kernighan</em></li>
+<li>📫 How to reach me: just send an email to <strong>anwentao1@gmail.com</strong></li>
 </ul>
-<p>gopl中关于为什么golang中要引入匿名成员的阐述：</p>
-<blockquote>
-<p>到目前为止，我们看到匿名成员特性只是对访问嵌套成员的点运算符提供了简短的语法糖。稍后，我们将会看到匿名成员并不要求是结构体类型；其实任何命名的类型都可以作为结构体的匿名成员。但是为什么要嵌入一个没有任何子成员类型的匿名成员类型呢？</p>
-<p>答案是匿名类型的方法集。简短的点运算符语法可以用于选择匿名成员嵌套的成员，也可以用于访问它们的方法。实际上，外层的结构体不仅仅是获得了匿名成员类型的所有成员，而且也获得了该类型导出的全部的方法。这个机制可以用于将一些有简单行为的对象组合成有复杂行为的对象。组合是Go语言中面向对象编程的核心，我们将在6.3节中专门讨论。</p>
-</blockquote>
-<h3 id="4-5-文本与HTML模板"><a href="#4-5-文本与HTML模板" class="headerlink" title="4.5 文本与HTML模板"></a>4.5 文本与HTML模板</h3><p>(参考资料：<a target="_blank" rel="noopener" href="https://books.studygolang.com/gopl-zh/ch4/ch4-06.html">https://books.studygolang.com/gopl-zh/ch4/ch4-06.html</a>)</p>
-<p>当打印的格式比较复杂时，如果能把格式化代码分离出来，那么会让后续模板的维护和修改变得更容易。golang内置的<code>text/template</code>和<code>html/template</code>提供了这样的功能。</p>
-<p>一个模板是一个字符串或者文件，里面包含多个<code>&#123;&#123;action&#125;&#125;</code>对象，对于普通的字符串，只是按照字面值打印；但是对于actions，将触发其对应的行为。下面是一个实例模板：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> templ = <span class="string">`&#123;&#123;.TotalCount&#125;&#125; issues:</span></span><br><span class="line"><span class="string">&#123;&#123;range .Items&#125;&#125;----------------------------------------</span></span><br><span class="line"><span class="string">Number: &#123;&#123;.Number&#125;&#125;</span></span><br><span class="line"><span class="string">User:   &#123;&#123;.User.Login&#125;&#125;</span></span><br><span class="line"><span class="string">Title:  &#123;&#123;.Title | printf &quot;%.64s&quot;&#125;&#125;</span></span><br><span class="line"><span class="string">Age:    &#123;&#123;.CreatedAt | daysAgo&#125;&#125; days</span></span><br><span class="line"><span class="string">&#123;&#123;end&#125;&#125;`</span></span><br></pre></td></tr></table></figure>
-<p>在这个例子中，templ模板处理的是结构体<code>IssuesSearchResult</code>，结构体定义可以在参考资料中找到。以下解释该模板中出现的几种action：</p>
-<ul>
-<li><code>.</code>：代表当前值的概念，此处代表一个<code>IssuesSearchResult</code>结构体，<code>&#123;&#123;.Number&#125;&#125;</code>的含义就是该结构体Number成员的字面值</li>
-<li><code>&#123;&#123;range .Items&#125;&#125;, &#123;&#123;end&#125;&#125;</code>：循环action，多次迭代</li>
-<li><code>&#123;&#123;.CreatedAt | daysAgo&#125;&#125;</code>：<code>|</code>类似unix shell中的管道，将前面的表达式的结果作为后面函数的输入；<code>daysAgo</code>是一个自定义的函数，在调用模板时需要进行指定</li>
-</ul>
-<p>模板的使用：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">report, err := template.New(<span class="string">&quot;report&quot;</span>).</span><br><span class="line">    Funcs(template.FuncMap&#123;<span class="string">&quot;daysAgo&quot;</span>: daysAgo&#125;).</span><br><span class="line">    Parse(templ)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    log.Fatal(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>首先使用函数<code>New</code>创建一个新的模板，使用<code>Funcs</code>方法注册自定义函数到模板中，此后再调用<code>Parse</code>进行解析；使用<code>template.Must</code> 可以简化错误处理，如果解析出错，直接panic：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> report = template.Must(template.New(<span class="string">&quot;issuelist&quot;</span>).</span><br><span class="line">    Funcs(template.FuncMap&#123;<span class="string">&quot;daysAgo&quot;</span>: daysAgo&#125;).</span><br><span class="line">    Parse(templ))</span><br></pre></td></tr></table></figure>
-<p>模板的使用：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">func <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    result, err := github.SearchIssues(os.Args[<span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">        <span class="built_in">log</span>.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> err := report.Execute(os.Stdout, result); err != nil &#123;</span><br><span class="line">        <span class="built_in">log</span>.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><code>html/template</code>包的使用基本相同，但是<code>html/template</code>包会对输入的数据自动进行转义(如<code>#</code>, <code>&lt;</code>等特殊字符)；不过可以通过信任的<code>template.HTML</code>来阻止自动转义的行为：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">const</span> templ = <span class="string">`&lt;p&gt;A: &#123;&#123;.A&#125;&#125;&lt;/p&gt;&lt;p&gt;B: &#123;&#123;.B&#125;&#125;&lt;/p&gt;`</span></span><br><span class="line">    t := template.Must(template.New(<span class="string">&quot;escape&quot;</span>).Parse(templ))</span><br><span class="line">    <span class="keyword">var</span> data <span class="keyword">struct</span> &#123;</span><br><span class="line">        A <span class="type">string</span>        <span class="comment">// untrusted plain text</span></span><br><span class="line">        B template.HTML <span class="comment">// trusted HTML</span></span><br><span class="line">    &#125;</span><br><span class="line">    data.A = <span class="string">&quot;&lt;b&gt;Hello!&lt;/b&gt;&quot;</span></span><br><span class="line">    data.B = <span class="string">&quot;&lt;b&gt;Hello!&lt;/b&gt;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> err := t.Execute(os.Stdout, data); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        log.Fatal(err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="https://books.studygolang.com/gopl-zh/images/ch4-06.png" alt=""></p>
 
+      </div>
+      
+      
       
     </div>
+    
 
     
     
     
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
-  
-
 
 
           </div>
@@ -478,6 +243,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#About-myself"><span class="nav-number">1.</span> <span class="nav-text">About myself</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
