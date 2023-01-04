@@ -145,6 +145,98 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/04/gopl-chpt5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TimeSea05">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog of TimeSea05">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/01/04/gopl-chpt5/" class="post-title-link" itemprop="url">Untitled</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-04 13:57:32 / Modified: 14:02:03" itemprop="dateCreated datePublished" datetime="2023-01-04T13:57:32+08:00">2023-01-04</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="5-1-可变参数"><a href="#5-1-可变参数" class="headerlink" title="5.1 可变参数"></a>5.1 可变参数</h3><p>在声明可变参数函数时，需要在参数列表的最后一个参数类型之前加上省略符号”…”，这表示该函数会接收任意数量的该类型参数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sum</span><span class="params">(vals ...<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    total := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> _, val := <span class="keyword">range</span> vals &#123;</span><br><span class="line">        total += val</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> total</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>此时<code>vals</code>可以看作是int类型的切片，sum可以接受任何数量的参数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(sum())</span><br><span class="line">fmt.Println(sum(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>))</span><br></pre></td></tr></table></figure>
+<p>如果向sum函数传递一个切片，那么在传递时，需要在最后一个参数后加上省略符：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">values := []<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;</span><br><span class="line">fmt.Println(sum(values...))</span><br></pre></td></tr></table></figure>
+<p>如果要传递一个数组，那么首先要把数组转换为切片：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">array := [...]<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">fmt.Println(sum(array[:]...))</span><br></pre></td></tr></table></figure>
+<p><strong>要注意的是</strong>，<code>[]int&#123;1, 2, 3, 4, 5&#125;</code><strong>是切片类型，而</strong><code>[...]int&#123;1, 2, 3, 4, 5&#125;</code> <strong>是数组类型</strong></p>
+<h3 id="5-2-defer"><a href="#5-2-defer" class="headerlink" title="5.2 defer"></a>5.2 defer</h3><p>defer语句通常用来处理成对的操作，如打开文件和关闭文件、加锁和释放锁。</p>
+<blockquote>
+<p>The function and argument expressions <strong>are evaluated when the statement is executed</strong>, but the actual call is <em>deferred</em> until the function that contains the defer statement has finished, <strong>whether normally, by executing a return statement or falling off the end, or abnormally, by panicking.</strong></p>
+</blockquote>
+<p>如处理文件时，可以采用defer机制：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ReadFile</span><span class="params">(filename <span class="type">string</span>)</span></span> ([]<span class="type">byte</span>, <span class="type">error</span>) &#123;</span><br><span class="line">    f, err := os.Open(filename)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> f.Close()</span><br><span class="line">    <span class="keyword">return</span> ReadAll(f)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="5-2-1-defer记录何时进入和退出函数"><a href="#5-2-1-defer记录何时进入和退出函数" class="headerlink" title="5.2.1 defer记录何时进入和退出函数"></a>5.2.1 defer记录何时进入和退出函数</h4><p>注意第一段加黑的字：<strong>The function and argument expressions are evaluated when the statement is executed</strong>，也就是说，在执行到defer语句时，函数和参数的表达式会被先计算出来，但是函数调用是被推迟的。如下面这个例子：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">bigSlowOperation</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> trace(<span class="string">&quot;bigSlowOperation&quot;</span>)() <span class="comment">// don&#x27;t forget the extra parentheses</span></span><br><span class="line">    time.Sleep(<span class="number">10</span> * time.Second) <span class="comment">// simulate slow operation by sleeping</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">trace</span><span class="params">(msg <span class="type">string</span>)</span></span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    start := time.Now()</span><br><span class="line">    log.Printf(<span class="string">&quot;enter %s&quot;</span>, msg)</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; </span><br><span class="line">        log.Printf(<span class="string">&quot;exit %s (%s)&quot;</span>, msg,time.Since(start)) </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2023/01/03 23:29:38 enter bigSlowOperation</span><br><span class="line">2023/01/03 23:29:49 exit bigSlowOperation (10.009113572s)</span><br></pre></td></tr></table></figure>
+<p>首先在进入函数<code>bigSlowOperation</code>时，defer语句中的表达式会先被计算出来，也就是调用<code>trace</code>计算出要被<em>推迟</em>调用的函数，此处这个被<em>推迟</em>调用的函数是<code>trace</code>返回的匿名函数。所以在开始时，调用<code>trace</code>函数，打印log，返回被<em>推迟</em>调用的函数，这个函数在<code>bigSlowOperation</code>执行结束后被调用，打印log，正好实现了记录函数被调用和调用完成的时间。</p>
+<h4 id="5-2-2-defer语句的调用顺序问题"><a href="#5-2-2-defer语句的调用顺序问题" class="headerlink" title="5.2.2 defer语句的调用顺序问题"></a>5.2.2 defer语句的调用顺序问题</h4><blockquote>
+<p>Any number of calls may be deferred; they are executed in the reverse of the order in which they were deferred.</p>
+</blockquote>
+<h4 id="5-2-3-defer语句修改函数返回值"><a href="#5-2-3-defer语句修改函数返回值" class="headerlink" title="5.2.3 defer语句修改函数返回值"></a>5.2.3 defer语句修改函数返回值</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">double</span><span class="params">(x <span class="type">int</span>)</span></span> (result <span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; fmt.Printf(<span class="string">&quot;double(%d) = %d\n&quot;</span>, x,result) &#125;()</span><br><span class="line">    <span class="keyword">return</span> x + x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">_ = double(<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<blockquote>
+<p>“double(4) = 8”</p>
+</blockquote>
+<h4 id="5-2-4-避免在循环里使用defer语句"><a href="#5-2-4-避免在循环里使用defer语句" class="headerlink" title="5.2.4 避免在循环里使用defer语句"></a>5.2.4 避免在循环里使用defer语句</h4><p>在循环体中的defer语句需要特别注意，因为只有在函数执行完毕后，这些被延迟的函数才会执行。下面的代码会导致系统的文件描述符耗尽，因为在所有文件都被处理之前，没有文件会被关闭。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _, filename := <span class="keyword">range</span> filenames &#123;</span><br><span class="line">    f, err := os.Open(filename)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> f.Close() <span class="comment">// <span class="doctag">NOTE:</span> risky; could run out of file descriptors</span></span><br><span class="line">    <span class="comment">// ...process f…</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="5-3-panic-amp-amp-recover"><a href="#5-3-panic-amp-amp-recover" class="headerlink" title="5.3 panic &amp;&amp; recover"></a>5.3 panic &amp;&amp; recover</h3><p>go的panic机制类似于其他语言的异常机制，但是panic会引起程序的崩溃，因此panic一般用于严重的错误。对于大部分的错误和漏洞，应该使用go提供的错误机制。</p>
+<p>当panic异常发生时，程序会中断运行，执行当前goroutine中被defer延迟的函数，随后程序输出日志信息，包括panic value和堆栈跟踪信息。</p>
+<p>通常来说，不应该对panic做任何处理，但是有时我们可以从异常中恢复，或者说在程序崩溃前，做一些操作，如web服务器在运行时出现panic异常，应该在崩溃前把所有的连接都关闭，否则客户端会一直处于等待状态。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Parse</span><span class="params">(input <span class="type">string</span>)</span></span> (s *Syntax, err <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">        <span class="keyword">if</span> p := <span class="built_in">recover</span>(); p != <span class="literal">nil</span> &#123;</span><br><span class="line">            err = fmt.Errorf(<span class="string">&quot;internal error: %v&quot;</span>, p)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;()</span><br><span class="line">    <span class="comment">// ...parser...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/02/leetcode-strange-runtime-error/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -497,7 +589,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">4</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
