@@ -145,6 +145,83 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/06/gopl-chpt6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TimeSea05">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog of TimeSea05">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/01/06/gopl-chpt6/" class="post-title-link" itemprop="url">Gopl Note: Chapter 6</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-06 13:33:26 / Modified: 13:39:07" itemprop="dateCreated datePublished" datetime="2023-01-06T13:33:26+08:00">2023-01-06</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h3 id="6-1-方法-method"><a href="#6-1-方法-method" class="headerlink" title="6.1 方法(method)"></a>6.1 方法(method)</h3><blockquote>
+<p>在函数声明时，在其名字之前放上一个变量，即是一个方法。这个附加的参数会将该函数附加到这种类型上，即相当于为这种类型定义了一个独占的方法。</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Point <span class="keyword">struct</span>&#123; X, Y <span class="type">float64</span> &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p Point)</span></span> Distance(q Point) <span class="type">float64</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> math.Hypot(q.X-p.X, q.Y-p.Y)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>附加的参数<code>p</code>，叫做方法的接收器。go语言中不像其他语言一样使用<code>this</code>或者<code>self</code>作为接收器。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">p := Point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">q := Point&#123;<span class="number">4</span>, <span class="number">6</span>&#125;</span><br><span class="line">fmt.Println(p.Distance(q))  <span class="comment">// &quot;5&quot;, method call</span></span><br></pre></td></tr></table></figure>
+<p>像<code>p.Distance</code>的表达式叫做选择器，它选择合适的对应<code>p</code>这个对象的<code>Distance</code>的方法来执行。</p>
+<h3 id="6-2-通过嵌入结构体来扩展类型"><a href="#6-2-通过嵌入结构体来扩展类型" class="headerlink" title="6.2 通过嵌入结构体来扩展类型"></a>6.2 通过嵌入结构体来扩展类型</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Point <span class="keyword">struct</span>&#123; X, Y <span class="type">float64</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ColoredPoint <span class="keyword">struct</span> &#123;</span><br><span class="line">    Point</span><br><span class="line">    Color color.RGBA</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Point)</span></span> ScaleBy(factor <span class="type">float64</span>) &#123;</span><br><span class="line">	p.X *= factor</span><br><span class="line">	p.Y *= factor</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p Point)</span></span> Distance(q Point) <span class="type">float64</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> math.Hypot(q.X-p.X, q.Y-p.Y)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于嵌入结构体<code>ColoredPoint</code>，可以直接认为嵌入的字段就是<code>ColoredPoint</code>自己的字段，不需要在调用时指出Point；对于Point类型的方法也是一样，可以直接把<code>ColoredPoint</code>类型当作接收器来调用<code>Point</code>中的方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">red := color.RGBA&#123;<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>&#125;</span><br><span class="line"><span class="keyword">var</span> p = ColoredPoint&#123;Point&#123;<span class="number">1</span>, <span class="number">1</span>&#125;, red&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(p)</span><br><span class="line">p.ScaleBy(<span class="number">2</span>)</span><br><span class="line">fmt.Println(p)</span><br></pre></td></tr></table></figure>
+<p>输出：<br><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;1 1&#125; &#123;255 0 0 255&#125;&#125;</span><br><span class="line">&#123;&#123;2 2&#125; &#123;255 0 0 255&#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用<code>Point</code>类型的<code>Distance</code>方法时，要注意<code>Distance</code>方法接受的参数仍然是<code>Point</code>类型，所以如果将一个<code>ColoredPoint</code>类型的变量传递给<code>Distance</code>方法，编译器会报错：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">red := color.RGBA&#123;<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>&#125;</span><br><span class="line">blue := color.RGBA&#123;<span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>, <span class="number">255</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> p = ColoredPoint&#123;Point&#123;<span class="number">1</span>, <span class="number">1</span>&#125;, red&#125;</span><br><span class="line"><span class="keyword">var</span> q = ColoredPoint&#123;Point&#123;<span class="number">5</span>, <span class="number">4</span>&#125;, blue&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(p.Distance(q))</span><br></pre></td></tr></table></figure>
+<p>编译器报错：<font color="red">cannot use q (variable of type ColoredPoint) as Point value in argument to p.Distance</font></p>
+<p>正确的调用方式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(p.Distance(q.Point))</span><br></pre></td></tr></table></figure>
+<h3 id="6-3-trick-使用嵌入结构体构造带互斥锁的cache"><a href="#6-3-trick-使用嵌入结构体构造带互斥锁的cache" class="headerlink" title="6.3 trick: 使用嵌入结构体构造带互斥锁的cache"></a>6.3 trick: 使用嵌入结构体构造带互斥锁的cache</h3><p>cache这个概念在计算机科学中被经常使用。像IP层协议ARP，根据IP地址查询MAC地址时，便需要一个cache。最多只能有一个线程读取和修改cache，因此需要为cache增加一个互斥锁。使用嵌入结构体可以实现非常简明的语法对cache进行操作：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> cache = <span class="keyword">struct</span> &#123;</span><br><span class="line">    sync.Mutex</span><br><span class="line">    mapping <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span></span><br><span class="line">&#125;&#123;</span><br><span class="line">    mapping: <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span>),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Lookup</span><span class="params">(key <span class="type">string</span>)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">    cache.Lock()</span><br><span class="line">    v := cache.mapping[key]</span><br><span class="line">    cache.Unlock()</span><br><span class="line">    <span class="keyword">return</span> v</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="6-4-方法值"><a href="#6-4-方法值" class="headerlink" title="6.4 方法值"></a>6.4 方法值</h3><p>为方法指定接收器之后，调用方法时便不需要再指定接收器：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">p := Point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">Distance := p.Distance</span><br><span class="line">fmt.Println(Distance(Point&#123;<span class="number">5</span>, <span class="number">5</span>&#125;))</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/04/gopl-chpt5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -589,7 +666,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
