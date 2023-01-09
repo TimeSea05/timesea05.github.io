@@ -168,10 +168,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2023-01-06 13:33:26 / Modified: 13:39:07" itemprop="dateCreated datePublished" datetime="2023-01-06T13:33:26+08:00">2023-01-06</time>
+              <time title="Created: 2023-01-06 13:33:26" itemprop="dateCreated datePublished" datetime="2023-01-06T13:33:26+08:00">2023-01-06</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-01-09 21:16:30" itemprop="dateModified" datetime="2023-01-09T21:16:30+08:00">2023-01-09</time>
+              </span>
 
           
 
@@ -184,7 +190,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="方法method">6.1 方法(method)</h3>
+          <h2 id="方法method">6.1 方法(method)</h2>
 <blockquote>
 <p>在函数声明时，在其名字之前放上一个变量，即是一个方法。这个附加的参数会将该函数附加到这种类型上，即相当于为这种类型定义了一个独占的方法。</p>
 </blockquote>
@@ -192,7 +198,7 @@
 <p>附加的参数<code>p</code>，叫做方法的接收器。go语言中不像其他语言一样使用<code>this</code>或者<code>self</code>作为接收器。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">p := Point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">q := Point&#123;<span class="number">4</span>, <span class="number">6</span>&#125;</span><br><span class="line">fmt.Println(p.Distance(q))  <span class="comment">// &quot;5&quot;, method call</span></span><br></pre></td></tr></table></figure>
 <p>像<code>p.Distance</code>的表达式叫做选择器，它选择合适的对应<code>p</code>这个对象的<code>Distance</code>的方法来执行。</p>
-<h3 id="通过嵌入结构体来扩展类型">6.2 通过嵌入结构体来扩展类型</h3>
+<h2 id="通过嵌入结构体来扩展类型">6.2 通过嵌入结构体来扩展类型</h2>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Point <span class="keyword">struct</span>&#123; X, Y <span class="type">float64</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ColoredPoint <span class="keyword">struct</span> &#123;</span><br><span class="line">    Point</span><br><span class="line">    Color color.RGBA</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Point)</span></span> ScaleBy(factor <span class="type">float64</span>) &#123;</span><br><span class="line">	p.X *= factor</span><br><span class="line">	p.Y *= factor</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p Point)</span></span> Distance(q Point) <span class="type">float64</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> math.Hypot(q.X-p.X, q.Y-p.Y)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>对于嵌入结构体<code>ColoredPoint</code>，可以直接认为嵌入的字段就是<code>ColoredPoint</code>自己的字段，不需要在调用时指出Point；对于Point类型的方法也是一样，可以直接把<code>ColoredPoint</code>类型当作接收器来调用<code>Point</code>中的方法：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">red := color.RGBA&#123;<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>&#125;</span><br><span class="line"><span class="keyword">var</span> p = ColoredPoint&#123;Point&#123;<span class="number">1</span>, <span class="number">1</span>&#125;, red&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(p)</span><br><span class="line">p.ScaleBy(<span class="number">2</span>)</span><br><span class="line">fmt.Println(p)</span><br></pre></td></tr></table></figure>
@@ -202,10 +208,10 @@
 <p>编译器报错：<font color="red">cannot use q (variable of type ColoredPoint) as Point value in argument to p.Distance</font></p>
 <p>正确的调用方式：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(p.Distance(q.Point))</span><br></pre></td></tr></table></figure>
-<h3 id="trick-使用嵌入结构体构造带互斥锁的cache">6.3 trick: 使用嵌入结构体构造带互斥锁的cache</h3>
+<h2 id="trick-使用嵌入结构体构造带互斥锁的cache">6.3 trick: 使用嵌入结构体构造带互斥锁的cache</h2>
 <p>cache这个概念在计算机科学中被经常使用。像IP层协议ARP，根据IP地址查询MAC地址时，便需要一个cache。最多只能有一个线程读取和修改cache，因此需要为cache增加一个互斥锁。使用嵌入结构体可以实现非常简明的语法对cache进行操作：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> cache = <span class="keyword">struct</span> &#123;</span><br><span class="line">    sync.Mutex</span><br><span class="line">    mapping <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span></span><br><span class="line">&#125;&#123;</span><br><span class="line">    mapping: <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span>),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Lookup</span><span class="params">(key <span class="type">string</span>)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">    cache.Lock()</span><br><span class="line">    v := cache.mapping[key]</span><br><span class="line">    cache.Unlock()</span><br><span class="line">    <span class="keyword">return</span> v</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="方法值">6.4 方法值</h3>
+<h2 id="方法值">6.4 方法值</h2>
 <p>为方法指定接收器之后，调用方法时便不需要再指定接收器：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">p := Point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">Distance := p.Distance</span><br><span class="line">fmt.Println(Distance(Point&#123;<span class="number">5</span>, <span class="number">5</span>&#125;))</span><br></pre></td></tr></table></figure>
 
@@ -250,10 +256,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2023-01-04 13:57:32 / Modified: 14:04:15" itemprop="dateCreated datePublished" datetime="2023-01-04T13:57:32+08:00">2023-01-04</time>
+              <time title="Created: 2023-01-04 13:57:32" itemprop="dateCreated datePublished" datetime="2023-01-04T13:57:32+08:00">2023-01-04</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-01-09 21:16:28" itemprop="dateModified" datetime="2023-01-09T21:16:28+08:00">2023-01-09</time>
+              </span>
 
           
 
@@ -266,7 +278,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="可变参数">5.1 可变参数</h3>
+          <h2 id="可变参数">5.1 可变参数</h2>
 <p>在声明可变参数函数时，需要在参数列表的最后一个参数类型之前加上省略符号"..."，这表示该函数会接收任意数量的该类型参数。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sum</span><span class="params">(vals ...<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">    total := <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> _, val := <span class="keyword">range</span> vals &#123;</span><br><span class="line">        total += val</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> total</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>此时<code>vals</code>可以看作是int类型的切片，sum可以接受任何数量的参数：</p>
@@ -276,33 +288,33 @@
 <p>如果要传递一个数组，那么首先要把数组转换为切片：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">array := [...]<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">fmt.Println(sum(array[:]...))</span><br></pre></td></tr></table></figure>
 <p><strong>要注意的是</strong>，<code>[]int&#123;1, 2, 3, 4, 5&#125;</code><strong>是切片类型，而</strong><code>[...]int&#123;1, 2, 3, 4, 5&#125;</code> <strong>是数组类型</strong></p>
-<h3 id="defer">5.2 defer</h3>
+<h2 id="defer">5.2 defer</h2>
 <p>defer语句通常用来处理成对的操作，如打开文件和关闭文件、加锁和释放锁。</p>
 <blockquote>
 <p>The function and argument expressions <strong>are evaluated when the statement is executed</strong>, but the actual call is <em>deferred</em> until the function that contains the defer statement has finished, <strong>whether normally, by executing a return statement or falling off the end, or abnormally, by panicking.</strong></p>
 </blockquote>
 <p>如处理文件时，可以采用defer机制：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ReadFile</span><span class="params">(filename <span class="type">string</span>)</span></span> ([]<span class="type">byte</span>, <span class="type">error</span>) &#123;</span><br><span class="line">    f, err := os.Open(filename)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> f.Close()</span><br><span class="line">    <span class="keyword">return</span> ReadAll(f)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="defer记录何时进入和退出函数">5.2.1 defer记录何时进入和退出函数</h4>
+<h3 id="defer记录何时进入和退出函数">5.2.1 defer记录何时进入和退出函数</h3>
 <p>注意第一段加黑的字：<strong>The function and argument expressions are evaluated when the statement is executed</strong>，也就是说，在执行到defer语句时，函数和参数的表达式会被先计算出来，但是函数调用是被推迟的。如下面这个例子：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">bigSlowOperation</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">defer</span> trace(<span class="string">&quot;bigSlowOperation&quot;</span>)() <span class="comment">// don&#x27;t forget the extra parentheses</span></span><br><span class="line">    time.Sleep(<span class="number">10</span> * time.Second) <span class="comment">// simulate slow operation by sleeping</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">trace</span><span class="params">(msg <span class="type">string</span>)</span></span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    start := time.Now()</span><br><span class="line">    log.Printf(<span class="string">&quot;enter %s&quot;</span>, msg)</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; </span><br><span class="line">        log.Printf(<span class="string">&quot;exit %s (%s)&quot;</span>, msg,time.Since(start)) </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>输出结果为：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2023/01/03 23:29:38 enter bigSlowOperation</span><br><span class="line">2023/01/03 23:29:49 exit bigSlowOperation (10.009113572s)</span><br></pre></td></tr></table></figure>
 <p>首先在进入函数<code>bigSlowOperation</code>时，defer语句中的表达式会先被计算出来，也就是调用<code>trace</code>计算出要被<em>推迟</em>调用的函数，此处这个被<em>推迟</em>调用的函数是<code>trace</code>返回的匿名函数。所以在开始时，调用<code>trace</code>函数，打印log，返回被<em>推迟</em>调用的函数，这个函数在<code>bigSlowOperation</code>执行结束后被调用，打印log，正好实现了记录函数被调用和调用完成的时间。</p>
-<h4 id="defer语句的调用顺序问题">5.2.2 defer语句的调用顺序问题</h4>
+<h3 id="defer语句的调用顺序问题">5.2.2 defer语句的调用顺序问题</h3>
 <blockquote>
 <p>Any number of calls may be deferred; they are executed in the reverse of the order in which they were deferred.</p>
 </blockquote>
-<h4 id="defer语句修改函数返回值">5.2.3 defer语句修改函数返回值</h4>
+<h3 id="defer语句修改函数返回值">5.2.3 defer语句修改函数返回值</h3>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">double</span><span class="params">(x <span class="type">int</span>)</span></span> (result <span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; fmt.Printf(<span class="string">&quot;double(%d) = %d\n&quot;</span>, x,result) &#125;()</span><br><span class="line">    <span class="keyword">return</span> x + x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">_ = double(<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
 <p>输出：</p>
 <blockquote>
 <p>"double(4) = 8"</p>
 </blockquote>
-<h4 id="避免在循环里使用defer语句">5.2.4 避免在循环里使用defer语句</h4>
+<h3 id="避免在循环里使用defer语句">5.2.4 避免在循环里使用defer语句</h3>
 <p>在循环体中的defer语句需要特别注意，因为只有在函数执行完毕后，这些被延迟的函数才会执行。下面的代码会导致系统的文件描述符耗尽，因为在所有文件都被处理之前，没有文件会被关闭。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _, filename := <span class="keyword">range</span> filenames &#123;</span><br><span class="line">    f, err := os.Open(filename)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> f.Close() <span class="comment">// <span class="doctag">NOTE:</span> risky; could run out of file descriptors</span></span><br><span class="line">    <span class="comment">// ...process f…</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="panic-recover">5.3 panic &amp;&amp; recover</h3>
+<h2 id="panic-recover">5.3 panic &amp;&amp; recover</h2>
 <p>go的panic机制类似于其他语言的异常机制，但是panic会引起程序的崩溃，因此panic一般用于严重的错误。对于大部分的错误和漏洞，应该使用go提供的错误机制。</p>
 <p>当panic异常发生时，程序会中断运行，执行当前goroutine中被defer延迟的函数，随后程序输出日志信息，包括panic value和堆栈跟踪信息。</p>
 <p>通常来说，不应该对panic做任何处理，但是有时我们可以从异常中恢复，或者说在程序崩溃前，做一些操作，如web服务器在运行时出现panic异常，应该在崩溃前把所有的连接都关闭，否则客户端会一直处于等待状态。</p>
@@ -505,7 +517,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-01-06 17:16:22" itemprop="dateModified" datetime="2023-01-06T17:16:22+08:00">2023-01-06</time>
+                <time title="Modified: 2023-01-09 21:16:26" itemprop="dateModified" datetime="2023-01-09T21:16:26+08:00">2023-01-09</time>
               </span>
 
           
@@ -519,14 +531,14 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="iota">4.1 iota</h3>
+          <h2 id="iota">4.1 iota</h2>
 <p>Iota is a useful concept for creating incrementing constants in Go.</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	USD = <span class="literal">iota</span></span><br><span class="line">	EUR</span><br><span class="line">	GBP</span><br><span class="line">	RMB</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	symbol := [...]<span class="type">string</span>&#123;USD: <span class="string">&quot;$&quot;</span>, EUR: <span class="string">&quot;€&quot;</span>, GBP: <span class="string">&quot;￡&quot;</span>, RMB: <span class="string">&quot;￥&quot;</span>&#125;</span><br><span class="line">	fmt.Println(RMB, symbol[RMB])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>output:</p>
 <blockquote>
 <p>3 ￥</p>
 </blockquote>
-<h3 id="sha256算法">4.2 sha256算法</h3>
+<h2 id="sha256算法">4.2 sha256算法</h2>
 <p>一个n位的哈希函数就是一个从任意长的消息到<code>n</code>位哈希值的映射，一个<code>n</code>位的加密哈希函数就是一个单向的、避免碰撞的n位哈希函数。这样的函数是目前在数字签名和密码保护当中极为重要的手段。当前比较流行的哈希函数主要有128位的MD4和MD5和160位的SHA-1，SHA-2族有着更多位的输出哈希值，破解难度更大，能够提高更高的安全性。</p>
 <p>对于任意长度的消息，SHA256都会产生一个256位的哈希值，称作消息摘要。这个摘要相当于是个长度为32个字节的数组，通常有一个长度为64的十六进制字符串来表示，其中1个字节=8位，一个十六进制的字符的长度为4位。</p>
 <p>计算"Blockchain"经过SHA256得到的哈希值：</p>
@@ -542,11 +554,11 @@
 </ul>
 <p>将消息进行逐个处理：从一个固定的初始哈希<span class="math inline">\(H^{(0)}\)</span>开始，进行以下序列的计算： <span class="math display">\[H^{(i)} = H^{(i-1)}+C_{M^{(i)}}(H^{(i-1)})\]</span> 其中<span class="math inline">\(C\)</span>是SHA256的压缩函数，<span class="math inline">\(+\)</span>是<span class="math inline">\(\rm mod \;2^{32}\)</span>加法，<span class="math inline">\(H^{(N)}\)</span>是消息区块的哈希值</p>
 <p>详细内容请见：https://zhuanlan.zhihu.com/p/94619052</p>
-<h3 id="map操作">4.3 map操作</h3>
-<h4 id="section">4.3.1</h4>
+<h2 id="map操作">4.3 map操作</h2>
+<h3 id="section">4.3.1</h3>
 <p>删除map中的元素：使用内置<code>delete</code>函数</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">delete</span>(ages, <span class="string">&quot;Alice&quot;</span>)</span><br></pre></td></tr></table></figure>
-<h4 id="section-1">4.3.2</h4>
+<h3 id="section-1">4.3.2</h3>
 <p>要注意：map中的元素不是一个变量，因此不能对map的元素进行取指操作</p>
 <p>前几天遇到了一个bug：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> attr <span class="keyword">struct</span> &#123;</span><br><span class="line">	n    <span class="type">int</span></span><br><span class="line">	name <span class="type">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	m := <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]attr)</span><br><span class="line">	m[<span class="string">&quot;hello&quot;</span>].n++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -559,9 +571,9 @@
 <p>{1 main.go}</p>
 </blockquote>
 <p>符合预期</p>
-<h4 id="section-2">4.3.3</h4>
+<h3 id="section-2">4.3.3</h3>
 <p>Map的迭代顺序是不确定的，并且不同的哈希函数实现可能导致不同的遍历顺序。在实践中，遍历的顺序是随机的，每一次遍历的顺序都不相同。这是故意的，每次都使用随机的遍历顺序可以强制要求程序不会依赖具体的哈希函数实现。如果要按顺序遍历key/value对，我们必须显式地对key进行排序，可以使用sort包的Strings函数对字符串slice进行排序。</p>
-<h3 id="结构体匿名成员">4.4 结构体匿名成员</h3>
+<h2 id="结构体匿名成员">4.4 结构体匿名成员</h2>
 <p>考虑以下两个结构体</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">type Point <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">	X, Y <span class="type">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type Circle <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">	point Point</span><br><span class="line">	radius <span class="type">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>如果要访问<code>Circle</code>结构体中的成员，那么需要按照以下规则去访问：</p>
@@ -582,7 +594,7 @@
 <p>到目前为止，我们看到匿名成员特性只是对访问嵌套成员的点运算符提供了简短的语法糖。稍后，我们将会看到匿名成员并不要求是结构体类型；其实任何命名的类型都可以作为结构体的匿名成员。但是为什么要嵌入一个没有任何子成员类型的匿名成员类型呢？</p>
 <p>答案是匿名类型的方法集。简短的点运算符语法可以用于选择匿名成员嵌套的成员，也可以用于访问它们的方法。实际上，外层的结构体不仅仅是获得了匿名成员类型的所有成员，而且也获得了该类型导出的全部的方法。这个机制可以用于将一些有简单行为的对象组合成有复杂行为的对象。组合是Go语言中面向对象编程的核心，我们将在6.3节中专门讨论。</p>
 </blockquote>
-<h3 id="文本与html模板">4.5 文本与HTML模板</h3>
+<h2 id="文本与html模板">4.5 文本与HTML模板</h2>
 <p>(参考资料：https://books.studygolang.com/gopl-zh/ch4/ch4-06.html)</p>
 <p>当打印的格式比较复杂时，如果能把格式化代码分离出来，那么会让后续模板的维护和修改变得更容易。golang内置的<code>text/template</code>和<code>html/template</code>提供了这样的功能。</p>
 <p>一个模板是一个字符串或者文件，里面包含多个<code>&#123;&#123;action&#125;&#125;</code>对象，对于普通的字符串，只是按照字面值打印；但是对于actions，将触发其对应的行为。下面是一个实例模板：</p>

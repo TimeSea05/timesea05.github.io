@@ -28,7 +28,7 @@
 <meta property="og:description" content="6.1 方法(method)  在函数声明时，在其名字之前放上一个变量，即是一个方法。这个附加的参数会将该函数附加到这种类型上，即相当于为这种类型定义了一个独占的方法。  1234type Point struct&amp;#123; X, Y float64 &amp;#125;func (p Point) Distance(q Point) float64 &amp;#123;    return math.Hypo">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2023-01-06T05:33:26.622Z">
-<meta property="article:modified_time" content="2023-01-06T05:39:07.992Z">
+<meta property="article:modified_time" content="2023-01-09T13:16:30.019Z">
 <meta property="article:author" content="TimeSea05">
 <meta name="twitter:card" content="summary">
 
@@ -172,10 +172,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
-              
 
-              <time title="Created: 2023-01-06 13:33:26 / Modified: 13:39:07" itemprop="dateCreated datePublished" datetime="2023-01-06T13:33:26+08:00">2023-01-06</time>
+              <time title="Created: 2023-01-06 13:33:26" itemprop="dateCreated datePublished" datetime="2023-01-06T13:33:26+08:00">2023-01-06</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-01-09 21:16:30" itemprop="dateModified" datetime="2023-01-09T21:16:30+08:00">2023-01-09</time>
+              </span>
 
           
 
@@ -188,7 +194,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h3 id="方法method">6.1 方法(method)</h3>
+        <h2 id="方法method">6.1 方法(method)</h2>
 <blockquote>
 <p>在函数声明时，在其名字之前放上一个变量，即是一个方法。这个附加的参数会将该函数附加到这种类型上，即相当于为这种类型定义了一个独占的方法。</p>
 </blockquote>
@@ -196,7 +202,7 @@
 <p>附加的参数<code>p</code>，叫做方法的接收器。go语言中不像其他语言一样使用<code>this</code>或者<code>self</code>作为接收器。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">p := Point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">q := Point&#123;<span class="number">4</span>, <span class="number">6</span>&#125;</span><br><span class="line">fmt.Println(p.Distance(q))  <span class="comment">// &quot;5&quot;, method call</span></span><br></pre></td></tr></table></figure>
 <p>像<code>p.Distance</code>的表达式叫做选择器，它选择合适的对应<code>p</code>这个对象的<code>Distance</code>的方法来执行。</p>
-<h3 id="通过嵌入结构体来扩展类型">6.2 通过嵌入结构体来扩展类型</h3>
+<h2 id="通过嵌入结构体来扩展类型">6.2 通过嵌入结构体来扩展类型</h2>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Point <span class="keyword">struct</span>&#123; X, Y <span class="type">float64</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> ColoredPoint <span class="keyword">struct</span> &#123;</span><br><span class="line">    Point</span><br><span class="line">    Color color.RGBA</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *Point)</span></span> ScaleBy(factor <span class="type">float64</span>) &#123;</span><br><span class="line">	p.X *= factor</span><br><span class="line">	p.Y *= factor</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p Point)</span></span> Distance(q Point) <span class="type">float64</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> math.Hypot(q.X-p.X, q.Y-p.Y)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>对于嵌入结构体<code>ColoredPoint</code>，可以直接认为嵌入的字段就是<code>ColoredPoint</code>自己的字段，不需要在调用时指出Point；对于Point类型的方法也是一样，可以直接把<code>ColoredPoint</code>类型当作接收器来调用<code>Point</code>中的方法：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">red := color.RGBA&#123;<span class="number">255</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">255</span>&#125;</span><br><span class="line"><span class="keyword">var</span> p = ColoredPoint&#123;Point&#123;<span class="number">1</span>, <span class="number">1</span>&#125;, red&#125;</span><br><span class="line"></span><br><span class="line">fmt.Println(p)</span><br><span class="line">p.ScaleBy(<span class="number">2</span>)</span><br><span class="line">fmt.Println(p)</span><br></pre></td></tr></table></figure>
@@ -206,10 +212,10 @@
 <p>编译器报错：<font color="red">cannot use q (variable of type ColoredPoint) as Point value in argument to p.Distance</font></p>
 <p>正确的调用方式：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(p.Distance(q.Point))</span><br></pre></td></tr></table></figure>
-<h3 id="trick-使用嵌入结构体构造带互斥锁的cache">6.3 trick: 使用嵌入结构体构造带互斥锁的cache</h3>
+<h2 id="trick-使用嵌入结构体构造带互斥锁的cache">6.3 trick: 使用嵌入结构体构造带互斥锁的cache</h2>
 <p>cache这个概念在计算机科学中被经常使用。像IP层协议ARP，根据IP地址查询MAC地址时，便需要一个cache。最多只能有一个线程读取和修改cache，因此需要为cache增加一个互斥锁。使用嵌入结构体可以实现非常简明的语法对cache进行操作：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> cache = <span class="keyword">struct</span> &#123;</span><br><span class="line">    sync.Mutex</span><br><span class="line">    mapping <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span></span><br><span class="line">&#125;&#123;</span><br><span class="line">    mapping: <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span>),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Lookup</span><span class="params">(key <span class="type">string</span>)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">    cache.Lock()</span><br><span class="line">    v := cache.mapping[key]</span><br><span class="line">    cache.Unlock()</span><br><span class="line">    <span class="keyword">return</span> v</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="方法值">6.4 方法值</h3>
+<h2 id="方法值">6.4 方法值</h2>
 <p>为方法指定接收器之后，调用方法时便不需要再指定接收器：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">p := Point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">Distance := p.Distance</span><br><span class="line">fmt.Println(Distance(Point&#123;<span class="number">5</span>, <span class="number">5</span>&#125;))</span><br></pre></td></tr></table></figure>
 
@@ -289,7 +295,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95method"><span class="nav-number">1.</span> <span class="nav-text">6.1 方法(method)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%B5%8C%E5%85%A5%E7%BB%93%E6%9E%84%E4%BD%93%E6%9D%A5%E6%89%A9%E5%B1%95%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">6.2 通过嵌入结构体来扩展类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#trick-%E4%BD%BF%E7%94%A8%E5%B5%8C%E5%85%A5%E7%BB%93%E6%9E%84%E4%BD%93%E6%9E%84%E9%80%A0%E5%B8%A6%E4%BA%92%E6%96%A5%E9%94%81%E7%9A%84cache"><span class="nav-number">3.</span> <span class="nav-text">6.3 trick: 使用嵌入结构体构造带互斥锁的cache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%80%BC"><span class="nav-number">4.</span> <span class="nav-text">6.4 方法值</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95method"><span class="nav-number">1.</span> <span class="nav-text">6.1 方法(method)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E5%B5%8C%E5%85%A5%E7%BB%93%E6%9E%84%E4%BD%93%E6%9D%A5%E6%89%A9%E5%B1%95%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">6.2 通过嵌入结构体来扩展类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#trick-%E4%BD%BF%E7%94%A8%E5%B5%8C%E5%85%A5%E7%BB%93%E6%9E%84%E4%BD%93%E6%9E%84%E9%80%A0%E5%B8%A6%E4%BA%92%E6%96%A5%E9%94%81%E7%9A%84cache"><span class="nav-number">3.</span> <span class="nav-text">6.3 trick: 使用嵌入结构体构造带互斥锁的cache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E5%80%BC"><span class="nav-number">4.</span> <span class="nav-text">6.4 方法值</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
