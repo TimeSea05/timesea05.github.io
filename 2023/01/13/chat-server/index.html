@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"timesea05.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="1. 如何去构建一个chat server chat server要做的事情就是接收用户发来的信息，并且将这些信息广播给所有在聊天室中的用户。  服务端处于空闲状态时，会一直监听给定的端口 当用户发来一个连接请求时，服务端会启动一个新的goroutine去处理这个请求，处理的内容包括读取用户输入的信息和向用户发送信息  但是问题来了，如何使得一个用户发送的信息对聊天室所有的成员可见呢？  设置一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Build a Chat Server Using Golang">
+<meta property="og:url" content="http://timesea05.github.io/2023/01/13/chat-server/index.html">
+<meta property="og:site_name" content="Blog of TimeSea05">
+<meta property="og:description" content="1. 如何去构建一个chat server chat server要做的事情就是接收用户发来的信息，并且将这些信息广播给所有在聊天室中的用户。  服务端处于空闲状态时，会一直监听给定的端口 当用户发来一个连接请求时，服务端会启动一个新的goroutine去处理这个请求，处理的内容包括读取用户输入的信息和向用户发送信息  但是问题来了，如何使得一个用户发送的信息对聊天室所有的成员可见呢？  设置一个">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.328888.xyz/2023/01/13/wbYyb.jpeg">
+<meta property="article:published_time" content="2023-01-13T07:26:26.987Z">
+<meta property="article:modified_time" content="2023-01-13T07:32:23.657Z">
+<meta property="article:author" content="TimeSea05">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.328888.xyz/2023/01/13/wbYyb.jpeg">
+
+<link rel="canonical" href="http://timesea05.github.io/2023/01/13/chat-server/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Build a Chat Server Using Golang | Blog of TimeSea05</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog of TimeSea05</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/13/chat-server/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TimeSea05">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog of TimeSea05">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Build a Chat Server Using Golang
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-13 15:26:26 / Modified: 15:32:23" itemprop="dateCreated datePublished" datetime="2023-01-13T15:26:26+08:00">2023-01-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="如何去构建一个chat-server">1. 如何去构建一个chat server</h2>
+<p>chat server要做的事情就是接收用户发来的信息，并且将这些信息广播给所有在聊天室中的用户。</p>
+<ul>
+<li><p>服务端处于空闲状态时，会一直监听给定的端口</p></li>
+<li><p>当用户发来一个连接请求时，服务端会启动一个新的goroutine去处理这个请求，处理的内容包括读取用户输入的信息和向用户发送信息</p></li>
+</ul>
+<p>但是问题来了，如何使得一个用户发送的信息对聊天室所有的成员可见呢？</p>
+<ul>
+<li>设置一个map，里面记录了所有的用户连接信息</li>
+<li><p>设置一个broadcaster，使用select语句处理所有以下所有的channel，并且根据从channel中获取的信息，来对map进行修改</p></li>
+<li>设置一个channel <code>entering</code>，当用户发来一个连接请求时，会首先向<code>entering</code>中发送信息，此时broadcaster会将该用户的连接信息添加到map中</li>
+<li>设置一个channel <code>leaving</code>，当用户离开聊天室时，会向<code>leaving</code>中发送信息，此时broadcaster会将用户的连接信息从map中删除</li>
+<li><p>设置一个channel <code>messages</code>，当用户在聊天室中发送信息时，会向<code>messages</code>发送数据，此时broadcaster会遍历map，将从<code>messages</code>中获取到的信息，发送给聊天室中的所有成员</p></li>
+</ul>
+<h2 id="使用go-net包搭建chat-server">2. 使用go net包搭建chat server</h2>
+<p><em>注：以下代码来自于Gopl第8章第10节</em></p>
+<p>main函数的框架如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  listener, err := net.Listen(<span class="string">&quot;tcp&quot;</span>, <span class="string">&quot;localhost:8000&quot;</span>)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    log.Fatal(err)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">go</span> broadcaster()</span><br><span class="line">  <span class="keyword">for</span> &#123;</span><br><span class="line">    conn, err := listener.Accept()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      log.Print(err)</span><br><span class="line">      <span class="keyword">continue</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">go</span> handleConn(conn)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先服务器会在<code>localhost:8000</code>监听tcp连接，之后每次接收到一个tcp连接，都会启动一个goroutine，调用<code>handleConn</code>来处理该连接。需要注意的是，如果此处没有启动新的goroutine的话，那么只有等到当前连接结束之后，server才能处理下一个tcp连接。</p>
+<p>下面看一下<code>handleConn</code>的代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">handleConn</span><span class="params">(conn net.Conn)</span></span> &#123;</span><br><span class="line">  ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">string</span>) <span class="comment">// outgoing client messages</span></span><br><span class="line">  <span class="keyword">go</span> clientWriter(conn, ch)</span><br><span class="line"></span><br><span class="line">  who := conn.RemoteAddr().String()</span><br><span class="line">  ch &lt;- <span class="string">&quot;You are &quot;</span> + who</span><br><span class="line">  messages &lt;- who + <span class="string">&quot; has arrived&quot;</span></span><br><span class="line">  entering &lt;- ch</span><br><span class="line"></span><br><span class="line">  input := bufio.NewScanner(conn)</span><br><span class="line">  <span class="keyword">for</span> input.Scan() &#123;</span><br><span class="line">    messages &lt;- who + <span class="string">&quot;: &quot;</span> + input.Text()</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// <span class="doctag">NOTE:</span> ignoring potential errors from input.Err()</span></span><br><span class="line"></span><br><span class="line">  leaving &lt;- ch</span><br><span class="line">  messages &lt;- who + <span class="string">&quot; has left&quot;</span></span><br><span class="line">  conn.Close()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">clientWriter</span><span class="params">(conn net.Conn, ch &lt;-<span class="keyword">chan</span> <span class="type">string</span>)</span></span> &#123;</span><br><span class="line">  <span class="keyword">for</span> msg := <span class="keyword">range</span> ch &#123;</span><br><span class="line">    fmt.Fprintln(conn, msg) <span class="comment">// <span class="doctag">NOTE:</span> ignoring network errors</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先看一下<code>clientWriter</code>的代码，很简单，<code>clientWriter</code>做的事情就是从channel <code>ch</code>中读取数据，然后发送给用户。<code>net.Conn</code>实现了<code>io.Writer</code>接口，因此直接调用<code>fmt.Fprintln</code>就直接可以向用户发送数据。</p>
+<p>再来看<code>handleConn</code>的代码。这个函数上来就是先创建了一个channel <code>ch</code>，这个<code>ch</code>是服务器向用户传送信息的channel，每次向用户发送信息时，都会直接将信息发送到这个channel中；而接下来启动的这个goroutine调用<code>clientWriter</code>把<code>ch</code>中的信息读取出来，再发送给用户。</p>
+<p>之后<code>handleConn</code>将<code>ch</code>发送到channel <code>entering</code>中，broadcaster会从<code>entering</code>中读到<code>ch</code>，并添加<code>ch</code>到map中(此处的map相当于是一个数据库)。</p>
+<p>下面<code>handleConn</code>要做的是就是从用户处接收输入，并将用户的输入发送到channel <code>messages</code>里面。</p>
+<p>当用户停止发送信息，准备离开聊天室时，<code>handleConn</code>将<code>ch</code>发送到<code>leaving</code>中，broadcaster从<code>leaving</code>中读取到<code>ch</code>，将<code>ch</code>从map中删除。此后关闭连接。</p>
+<p>下面再来看一下<code>broadcaster</code>的代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> client <span class="keyword">chan</span>&lt;- <span class="type">string</span> <span class="comment">// an outgoing message channel</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">  entering = <span class="built_in">make</span>(<span class="keyword">chan</span> client)</span><br><span class="line">  leaving  = <span class="built_in">make</span>(<span class="keyword">chan</span> client)</span><br><span class="line">  messages = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="type">string</span>) <span class="comment">// all incoming client messages</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">broadcaster</span><span class="params">()</span></span> &#123;</span><br><span class="line">  clients := <span class="built_in">make</span>(<span class="keyword">map</span>[client]<span class="type">bool</span>) <span class="comment">// all connected clients</span></span><br><span class="line">  <span class="keyword">for</span> &#123;</span><br><span class="line">    <span class="keyword">select</span> &#123;</span><br><span class="line">    <span class="keyword">case</span> msg := &lt;-messages:</span><br><span class="line">      <span class="comment">// Broadcast incoming message to all</span></span><br><span class="line">      <span class="comment">// clients&#x27; outgoing message channels.</span></span><br><span class="line">      <span class="keyword">for</span> cli := <span class="keyword">range</span> clients &#123;</span><br><span class="line">        cli &lt;- msg</span><br><span class="line">      &#125;</span><br><span class="line">    <span class="keyword">case</span> cli := &lt;-entering:</span><br><span class="line">      clients[cli] = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> cli := &lt;-leaving:</span><br><span class="line">      <span class="built_in">delete</span>(clients, cli)</span><br><span class="line">      <span class="built_in">close</span>(cli)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在main函数开始执行时，就创建了一个broadcaster goroutine。通过多路复用，broadcaster实现了对三个channel的操作。broadcaster对<code>entering</code>和<code>leaving</code>的处理此处不再赘述，下面来看一下对channel <code>messages</code>的处理。其实也很简单，因为map中已经存放了所有用户的信息，那么只要遍历map就可以实现广播。</p>
+<p>下面看一下运行结果：</p>
+<p>首先是三个用户依次进入聊天室：</p>
+<p><em>server</em>:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go run main.go</span><br></pre></td></tr></table></figure>
+<p><em>client1</em>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">❯ netcat localhost 8000</span><br><span class="line">You are 127.0.0.1:37296</span><br><span class="line">127.0.0.1:45114 has arrived</span><br><span class="line">127.0.0.1:45124 has arrived</span><br></pre></td></tr></table></figure>
+<p><em>client2</em>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">❯ netcat localhost 8000</span><br><span class="line">You are 127.0.0.1:45114</span><br><span class="line">127.0.0.1:45124 has arrived</span><br></pre></td></tr></table></figure>
+<p><em>client3</em>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">❯ netcat localhost 8000</span><br><span class="line">You are 127.0.0.1:45124</span><br></pre></td></tr></table></figure>
+<p>此后从client1-client3依次发送self-introduction：</p>
+<p><em>client1</em>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">❯ netcat localhost 8000</span><br><span class="line">You are 127.0.0.1:37296</span><br><span class="line">127.0.0.1:45114 has arrived</span><br><span class="line">127.0.0.1:45124 has arrived</span><br><span class="line">Hi, I am client1</span><br><span class="line">127.0.0.1:37296: Hi, I am client1</span><br><span class="line">127.0.0.1:45114: Hi, I am client2</span><br><span class="line">127.0.0.1:45124: Hi, I am client3</span><br></pre></td></tr></table></figure>
+<p><em>client2</em>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">❯ netcat localhost 8000</span><br><span class="line">You are 127.0.0.1:45114</span><br><span class="line">127.0.0.1:45124 has arrived</span><br><span class="line">127.0.0.1:37296: Hi, I am client1</span><br><span class="line">Hi, I am client2</span><br><span class="line">127.0.0.1:45114: Hi, I am client2</span><br><span class="line">127.0.0.1:45124: Hi, I am client3</span><br></pre></td></tr></table></figure>
+<p><em>client3</em>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">❯ netcat localhost 8000</span><br><span class="line">You are 127.0.0.1:45124</span><br><span class="line">127.0.0.1:37296: Hi, I am client1</span><br><span class="line">127.0.0.1:45114: Hi, I am client2</span><br><span class="line">Hi, I am client3</span><br><span class="line">127.0.0.1:45124: Hi, I am client3</span><br></pre></td></tr></table></figure>
+<p>原理图大概如下，其中方形代表goroutine，椭圆形代表channel：</p>
+<p><a target="_blank" rel="noopener" href="https://imgloc.com/i/wbYyb"><img src="https://i.328888.xyz/2023/01/13/wbYyb.jpeg" alt="wbYyb.jpeg" /></a></p>
+<h2 id="a-more-advanced-chat-server">3. A more advanced chat server</h2>
+<p>项目地址：https://github.com/TutorialEdge/realtime-chat-go-react.git</p>
+<p>这个项目用的不是我们之前的tcp socket了，而是建立在tcp之上的websocket通信协议，但是server设计的基本思想还是一样的。</p>
+<p>websocket是在TCP上独立设计的全双工，有message概念的通信协议，为了兼容互联网现状，因此使用了和HTTP相同的端口和相似的协议形式，下面是一段websocket协议的报文：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GET /chat HTTP/1.1</span><br><span class="line">Host: server.example.com</span><br><span class="line">Upgrade: websocket</span><br><span class="line">Connection: Upgrade</span><br><span class="line">Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==</span><br><span class="line">Sec-WebSocket-Protocol: chat, superchat</span><br><span class="line">Sec-WebSocket-Version: 13</span><br><span class="line">Origin: http://example.com</span><br></pre></td></tr></table></figure>
+<p>由于websocket协议和HTTP协议相似，所以需要在websocket header中注明<code>Upgrade</code>和<code>Connection</code>字段。</p>
+<p>当客户端和服务端建立起websocket连接时，由于协议是双向的，服务端可以不断地推送信息给客户端。</p>
+<p>websocket解决了HTTP的<strong>被动性</strong>(只能由客户端向服务端发送HTTP请求，也就是说通信只能由客户端发起)和<strong>无状态</strong>(服务端不会记录来自客户端的信息，每一次客户端发送HTTP请求时，都要携带之前的信息)的问题。</p>
+<p>如果不使用websocket协议，那么则需要使用ajax或者long poll来实现双方的通信。</p>
+<p>ajax是客户端不断地发送HTTP请求询问服务端是否有新的信息推送给客户端，没有则返回。这对服务端处理HTTP请求的速度有很高的要求。</p>
+<p>而long poll采用的是阻塞模型，如果客户端询问服务端，但是服务端没有新的信息推送给客户端时，线程会阻塞，直到服务端有信息，并将信息推送给客户端。这对服务端并发能力提出了很高的要求。</p>
+<p>下面来看一下项目的代码。先来看后端：</p>
+<p><em>main.c</em></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">setupRoutes</span><span class="params">()</span></span> &#123;</span><br><span class="line">  pool := websocket.NewPool()</span><br><span class="line">  <span class="keyword">go</span> pool.Start()</span><br><span class="line"></span><br><span class="line">  http.HandleFunc(<span class="string">&quot;/ws&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">    serveWs(pool, w, r)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  fmt.Println(<span class="string">&quot;Distributed Chat App v0.01&quot;</span>)</span><br><span class="line">  setupRoutes()</span><br><span class="line">  http.ListenAndServe(<span class="string">&quot;:8080&quot;</span>, <span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>main函数中做的是setup routes，然后监听端口。函数<code>setupRoutes</code>新建一个<code>pool</code>(相当于#2 中的三个channel和一个map)，并且启动一个goroutine(相当于#2 中的broadcaster)。</p>
+<p>在前面已经提到过，直接调用<code>http.handleFunc</code>和<code>http.ListenAndServe</code>是在<code>defaultServeMux</code>中注册了路由。</p>
+<p>下面再来看handler <code>serveWs</code>的代码：</p>
+<p><em>main.c</em></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">serveWs</span><span class="params">(pool *websocket.Pool, w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">  fmt.Println(<span class="string">&quot;WebSocket Endpoint Hit&quot;</span>)</span><br><span class="line">  conn, err := websocket.Upgrade(w, r)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    fmt.Fprintf(w, <span class="string">&quot;%+v\n&quot;</span>, err)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  client := &amp;websocket.Client&#123;</span><br><span class="line">    Conn: conn,</span><br><span class="line">    Pool: pool,</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  pool.Register &lt;- client</span><br><span class="line">  client.Read()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码其实与#2 中的<code>handleConn</code>相似，只不过是调用了包<code>"github.com/gorilla/websocket"</code>中的API实现了对websocket header中<code>Upgrade</code>字段的处理。</p>
+<p>再来看一下前端：</p>
+<p><em>src/api/index.js</em></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> socket = <span class="keyword">new</span> <span class="title class_">WebSocket</span>(<span class="string">&#x27;ws://localhost:8080/ws&#x27;</span>) <span class="comment">// eslint-disable-line no-undef</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">connect</span> = callback =&gt; &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Attempting Connection&#x27;</span>)</span><br><span class="line"></span><br><span class="line">  socket.<span class="property">onopen</span> = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Successfully Connected&#x27;</span>)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  socket.<span class="property">onmessage</span> = <span class="function"><span class="params">msg</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(msg)</span><br><span class="line">    <span class="title function_">callback</span>(msg)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  socket.<span class="property">onclose</span> = <span class="function"><span class="params">event</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Socket Closed Connection: &#x27;</span>, event)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  socket.<span class="property">onerror</span> = <span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Socket Error: &#x27;</span>, error)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">sendMsg</span> = msg =&gt; &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Sending message: &#x27;</span>, msg)</span><br><span class="line">  socket.<span class="title function_">send</span>(msg)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> &#123; connect, sendMsg &#125;</span><br></pre></td></tr></table></figure>
+<p>首先是建立一个websocket，注意链接不再是我们熟悉的<code>http://...</code>而是<code>ws://localhost:8080/ws</code>，是因为协议已经不同了。</p>
+<p>同时设置两个API <code>connect</code>和<code>sendMsg</code>，为app提供websocket支持。<code>connect</code>是用来建立websocket连接，而<code>sendMsg</code>是通过websocket发送信息。</p>
+<p><em>src/App.js</em></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">App</span> () &#123;</span><br><span class="line">  <span class="keyword">const</span> [chatHistory, setChatHistory] = <span class="title class_">React</span>.<span class="title function_">useState</span>([])</span><br><span class="line">  <span class="title class_">React</span>.<span class="title function_">useEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="title function_">connect</span>(<span class="function"><span class="params">msg</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;New message&#x27;</span>)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">const</span> newChatHistory = [...chatHistory, msg]</span><br><span class="line">      <span class="title function_">setChatHistory</span>(newChatHistory)</span><br><span class="line">    &#125;)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(chatHistory)</span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">handleSend</span> (event) &#123;</span><br><span class="line">    <span class="keyword">if</span> (event.<span class="property">keyCode</span> === <span class="number">13</span>) &#123;</span><br><span class="line">      <span class="title function_">sendMsg</span>(event.<span class="property">target</span>.<span class="property">value</span>)</span><br><span class="line">      event.<span class="property">target</span>.<span class="property">value</span> = <span class="string">&#x27;&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">Header</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ChatHistory</span> <span class="attr">chatHistory</span>=<span class="string">&#123;chatHistory&#125;</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ChatInput</span> <span class="attr">handleSend</span>=<span class="string">&#123;handleSend&#125;</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">  )</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="title class_">App</span></span><br></pre></td></tr></table></figure>
+<p>调用<code>React.useEffect</code>，使得每次进入页面或者刷新页面时，都会调用<code>connect</code>与server建立websocket连接。<code>handleSend</code>是提供给<code>ChatInput</code> component的，目的是在每次按下回车键时，调用<code>sendMsg</code>发送信息。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/12/gopl-chpt8/" rel="prev" title="Gopl Note: Chapter 8">
+      <i class="fa fa-chevron-left"></i> Gopl Note: Chapter 8
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%8E%BB%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AAchat-server"><span class="nav-number">1.</span> <span class="nav-text">1. 如何去构建一个chat server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8go-net%E5%8C%85%E6%90%AD%E5%BB%BAchat-server"><span class="nav-number">2.</span> <span class="nav-text">2. 使用go net包搭建chat server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#a-more-advanced-chat-server"><span class="nav-number">3.</span> <span class="nav-text">3. A more advanced chat server</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">TimeSea05</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TimeSea05</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
