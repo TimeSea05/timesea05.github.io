@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"timesea05.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="1. 弱一致性模型 观察下面一段程序： 123456789var x, y intgo func() &amp;#123;  x &#x3D; 1 &#x2F;&#x2F; A1  fmt.Print(&quot;y:&quot;, y, &quot; &quot;) &#x2F;&#x2F; A2&amp;#125;()go func() &amp;#123;  y &#x3D; 1                   &#x2F;&#x2F; B1  fmt.Print(&quot;x:&amp;quo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gopl Note: Chapter 9">
+<meta property="og:url" content="http://timesea05.github.io/2023/01/15/gopl-chpt9/index.html">
+<meta property="og:site_name" content="Blog of TimeSea05">
+<meta property="og:description" content="1. 弱一致性模型 观察下面一段程序： 123456789var x, y intgo func() &amp;#123;  x &#x3D; 1 &#x2F;&#x2F; A1  fmt.Print(&quot;y:&quot;, y, &quot; &quot;) &#x2F;&#x2F; A2&amp;#125;()go func() &amp;#123;  y &#x3D; 1                   &#x2F;&#x2F; B1  fmt.Print(&quot;x:&amp;quo">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://img.draveness.me/2020-02-05-15808864354586-goroutines-on-thread.png">
+<meta property="article:published_time" content="2023-01-15T06:24:10.878Z">
+<meta property="article:modified_time" content="2023-01-15T06:27:51.608Z">
+<meta property="article:author" content="TimeSea05">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.draveness.me/2020-02-05-15808864354586-goroutines-on-thread.png">
+
+<link rel="canonical" href="http://timesea05.github.io/2023/01/15/gopl-chpt9/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Gopl Note: Chapter 9 | Blog of TimeSea05</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog of TimeSea05</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/15/gopl-chpt9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TimeSea05">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog of TimeSea05">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Gopl Note: Chapter 9
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-15 14:24:10 / Modified: 14:27:51" itemprop="dateCreated datePublished" datetime="2023-01-15T14:24:10+08:00">2023-01-15</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="弱一致性模型">1. 弱一致性模型</h2>
+<p>观察下面一段程序：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> x, y <span class="type">int</span></span><br><span class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">  x = <span class="number">1</span> <span class="comment">// A1</span></span><br><span class="line">  fmt.Print(<span class="string">&quot;y:&quot;</span>, y, <span class="string">&quot; &quot;</span>) <span class="comment">// A2</span></span><br><span class="line">&#125;()</span><br><span class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">  y = <span class="number">1</span>                   <span class="comment">// B1</span></span><br><span class="line">  fmt.Print(<span class="string">&quot;x:&quot;</span>, x, <span class="string">&quot; &quot;</span>) <span class="comment">// B2</span></span><br><span class="line">&#125;()</span><br></pre></td></tr></table></figure>
+<p>这两个goroutine并发执行，我们预期得到的情况会有以下几种：</p>
+<ul>
+<li><code>y:0, x:1</code>，代码执行顺序：A1-&gt;A2-&gt;B1-&gt;B2</li>
+<li><code>x:0, y:1</code>，代码执行顺序：B1-&gt;B2-&gt;A1-&gt;A2</li>
+<li><code>x:1, y:1</code>，代码执行顺序：A1-&gt;B1-&gt;A2-&gt;B2 或者 B1-&gt;A1-&gt;A2-&gt;B2</li>
+<li><code>y:1, x:1</code>，代码执行顺序：A1-&gt;B1-&gt;B2-&gt;A2 或者 B1-&gt;A1-&gt;B2-&gt;A2</li>
+</ul>
+<p>但是在实际执行过程中，会出现下面两种情况：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x:0, y:0</span><br><span class="line">y:0, x:0</span><br></pre></td></tr></table></figure>
+<p>这样的结果让人大吃一惊，但是该输出是的确存在的。从该结果可以推测出：CPU乱序执行使得语句的执行顺序发生了变化。</p>
+<p>现代CPU实现的内存模型大多是弱一致性模型。这种模型的主要思想是把同步操作和普通访存操作分开，程序员必须用硬件可识别的同步操作把对可写共享单元的访问保护起来, 以保证多个处理器对可写共享单元的访问是互斥的。</p>
+<p>在弱一致性模型中：</p>
+<ul>
+<li><p>在任一普通访存操作被允许执行之前, 所有在同一处理器中先于这一访存操作的同步操作都已完成</p></li>
+<li><p>在任一同步操作被允许执行之前, 所有在同一处理器中先于这一同步操作的普通访存操作都已完成</p></li>
+</ul>
+<p>弱一致性模型虽然增加了程序员的负担，但是有效的提高了程序的性能。</p>
+<p>回到这个程序上来，可以看出，每个goroutine执行的语句中，两条语句不存在依赖关系，因此为了提高效率，在必要情况下，CPU可以调换这两条语句的执行顺序，这样就出现了那个让我们惊讶的结果。</p>
+<h2 id="sync.once">2. sync.Once</h2>
+<p><em>以下内容来自 《Go语言高性能编程》</em></p>
+<h3 id="sync.once使用">2.1 sync.Once使用</h3>
+<p><code>sync.Once</code> 是 Go 标准库提供的使函数只执行一次的实现，常应用于单例模式，例如初始化配置、保持数据库连接等。作用与 <code>init</code> 函数类似，但有区别。</p>
+<ul>
+<li>init 函数是当所在的 package 首次被加载时执行，若迟迟未被使用，则既浪费了内存，又延长了程序加载时间。</li>
+<li>sync.Once 可以在代码的任意位置初始化和调用，因此可以延迟到使用时再执行，并发场景下是线程安全的。</li>
+</ul>
+<p>在多数情况下，<code>sync.Once</code> 被用于控制变量的初始化，这个变量的读写满足如下三个条件：</p>
+<ul>
+<li>当且仅当第一次访问某个变量时，进行初始化(写)</li>
+<li>变量初始化过程中，所有读都被阻塞，直到初始化完成；</li>
+<li>变量仅初始化一次，初始化完成后驻留在内存里。</li>
+</ul>
+<p>下面是示例代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Config <span class="keyword">struct</span> &#123;</span><br><span class="line">  Server <span class="type">string</span></span><br><span class="line">  Port   <span class="type">int64</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> (</span><br><span class="line">  once   sync.Once</span><br><span class="line">  config *Config</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ReadConfig</span><span class="params">()</span></span> *Config &#123;</span><br><span class="line">  once.Do(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> err <span class="type">error</span></span><br><span class="line">    config = &amp;Config&#123;Server: os.Getenv(<span class="string">&quot;TT_SERVER_URL&quot;</span>)&#125;</span><br><span class="line">    config.Port, err = strconv.ParseInt(os.Getenv(<span class="string">&quot;TT_PORT&quot;</span>), <span class="number">10</span>, <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      config.Port = <span class="number">8080</span> <span class="comment">// default port</span></span><br><span class="line">        &#125;</span><br><span class="line">        log.Println(<span class="string">&quot;init config&quot;</span>)</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">return</span> config</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">      _ = ReadConfig()</span><br><span class="line">    &#125;()</span><br><span class="line">  &#125;</span><br><span class="line">  time.Sleep(time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码中，要多次读取配置信息。在理想情况下，配置信息应该在第一次读取时进行初始化，此后再有goroutine尝试读取配置信息时，直接返回已经初始化的配置信息即可，就不用再重复进行初始化了。此时使用<code>sync.Once</code>便可以很简单的实现。</p>
+<h3 id="sync.once源码">2.2 sync.Once源码</h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> sync</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">&quot;sync/atomic&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Once <span class="keyword">struct</span> &#123;</span><br><span class="line">  done <span class="type">uint32</span></span><br><span class="line">  m    Mutex</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(o *Once)</span></span> Do(f <span class="function"><span class="keyword">func</span><span class="params">()</span></span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> atomic.LoadUint32(&amp;o.done) == <span class="number">0</span> &#123;</span><br><span class="line">      o.doSlow(f)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(o *Once)</span></span> doSlow(f <span class="function"><span class="keyword">func</span><span class="params">()</span></span>) &#123;</span><br><span class="line">  o.m.Lock()</span><br><span class="line">  <span class="keyword">defer</span> o.m.Unlock()</span><br><span class="line">  <span class="keyword">if</span> o.done == <span class="number">0</span> &#123;</span><br><span class="line">      <span class="keyword">defer</span> atomic.StoreUint32(&amp;o.done, <span class="number">1</span>)</span><br><span class="line">      f()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>源码理解起来也比较简单，使用<code>done</code>标记是否已经完成了初始化工作，使用互斥锁来实现线程安全。</p>
+<p><code>done</code>是结构体第一个字段，这是因为在实际应用场景下，<code>done</code>字段的访问频率要远高于互斥锁<code>m</code>的访问频率，将<code>done</code>放在第一个字段，可以减少CPU执行指令数目(如果<code>done</code>不在第一个字段，那么访问<code>done</code>时，还需要将传入的指针地址加上偏移量，如果把<code>done</code>放在第一个字段，那么传入的指针地址就是<code>done</code>的地址，就不用再计算偏移量，少了一条运算指令)。</p>
+<h2 id="并发非阻塞缓存的实现">3. 并发非阻塞缓存的实现</h2>
+<p>此处实现一个对http应答内容的缓存：对于任意的一个url，当程序第一次访问该url时，会发送http请求；当收到应答后，将应答返回给需要的程序，并将应答的结果存储在cache中，这样下一次再访问该url时，就不用再发送http请求了，直接从缓存中取出结果即可，这样大大提高了性能。</p>
+<p>先来看一个最简单的cache的实现：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// A Memo caches the results of calling a Func.</span></span><br><span class="line"><span class="keyword">type</span> Memo <span class="keyword">struct</span> &#123;</span><br><span class="line">  f     Func</span><br><span class="line">  mu    sync.Mutex <span class="comment">// guards cache</span></span><br><span class="line">  cache <span class="keyword">map</span>[<span class="type">string</span>]result</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Func is the type of the function to memoize.</span></span><br><span class="line"><span class="keyword">type</span> Func <span class="function"><span class="keyword">func</span><span class="params">(key <span class="type">string</span>)</span></span> (<span class="keyword">interface</span>&#123;&#125;, <span class="type">error</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> result <span class="keyword">struct</span> &#123;</span><br><span class="line">  value <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">  err   <span class="type">error</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Get is concurrency-safe.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(memo *Memo)</span></span> Get(key <span class="type">string</span>) (value <span class="keyword">interface</span>&#123;&#125;, err <span class="type">error</span>) &#123;</span><br><span class="line">  memo.mu.Lock()</span><br><span class="line">  res, ok := memo.cache[key]</span><br><span class="line">  <span class="keyword">if</span> !ok &#123;</span><br><span class="line">    res.value, res.err = memo.f(key)</span><br><span class="line">    memo.cache[key] = res</span><br><span class="line">  &#125;</span><br><span class="line">  memo.mu.Unlock()</span><br><span class="line">  <span class="keyword">return</span> res.value, res.err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>虽然这个cache是并发安全的，但是<code>Get</code>的实现丧失了并发的性能优点。每次对cache的访问都会持有锁，这样<code>Get</code>将原来可以并行化的I/O操作串行化，性能大大降低。</p>
+<p>下面对<code>Get</code>方法进行改进：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(memo *Memo)</span></span> Get(key <span class="type">string</span>) (value <span class="keyword">interface</span>&#123;&#125;, err <span class="type">error</span>) &#123;</span><br><span class="line">  memo.mu.Lock()</span><br><span class="line">  res, ok := memo.cache[key]</span><br><span class="line">  memo.mu.Unlock()</span><br><span class="line">  <span class="keyword">if</span> !ok &#123;</span><br><span class="line">    res.value, res.err = memo.f(key)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Between the two critical sections, several goroutines</span></span><br><span class="line">    <span class="comment">// may race to compute f(key) and update the map.</span></span><br><span class="line">    memo.mu.Lock()</span><br><span class="line">    memo.cache[key] = res</span><br><span class="line">    memo.mu.Unlock()</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> res.value, res.err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在修改后，调用<code>Get</code>的goroutine会两次获取锁：查找阶段获取一次，如果查找没有返回任何内容，那么进入更新阶段会再次获取。在这两次获取锁的中间阶段，其它goroutine可以随意使用cache。</p>
+<p>这些修改使性能再次得到了提升，但有一些URL被获取了两次。这种情况在两个以上的goroutine同一时刻调用Get来请求同样的URL时会发生。多个goroutine一起查询cache，发现没有值，然后一起调用<code>f</code>，而<code>f</code>的调用是非常耗费时间的。在得到结果后，也都会去更新map，其中一个获得的结果会覆盖掉另一个的结果。</p>
+<p>理想的情况是避免任何多余的工作(duplicate suppression)。下面版本的Memo每一个map元素都是指向一个条目的指针。每一个条目包含对函数f调用结果的内容缓存。与之前不同的是这次entry还包含了一个叫ready的channel。在条目的结果被设置之后，这个channel就会被关闭，以向其它goroutine广播去读取该条目内的结果是安全的了。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> entry <span class="keyword">struct</span> &#123;</span><br><span class="line">  res   result</span><br><span class="line">  ready <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125; <span class="comment">// closed when res is ready</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(f Func)</span></span> *Memo &#123;</span><br><span class="line">  <span class="keyword">return</span> &amp;Memo&#123;f: f, cache: <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="type">string</span>]*entry)&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Memo <span class="keyword">struct</span> &#123;</span><br><span class="line">  f     Func</span><br><span class="line">  mu    sync.Mutex <span class="comment">// guards cache</span></span><br><span class="line">  cache <span class="keyword">map</span>[<span class="type">string</span>]*entry</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(memo *Memo)</span></span> Get(key <span class="type">string</span>) (value <span class="keyword">interface</span>&#123;&#125;, err <span class="type">error</span>) &#123;</span><br><span class="line">  memo.mu.Lock()</span><br><span class="line">  e := memo.cache[key]</span><br><span class="line">  <span class="keyword">if</span> e == <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="comment">// This is the first request for this key.</span></span><br><span class="line">    <span class="comment">// This goroutine becomes responsible for computing</span></span><br><span class="line">    <span class="comment">// the value and broadcasting the ready condition.</span></span><br><span class="line">    e = &amp;entry&#123;ready: <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;)&#125;</span><br><span class="line">    memo.cache[key] = e</span><br><span class="line">    memo.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    e.res.value, e.res.err = memo.f(key)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">close</span>(e.ready) <span class="comment">// broadcast ready condition</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// This is a repeat request for this key.</span></span><br><span class="line">    memo.mu.Unlock()</span><br><span class="line"></span><br><span class="line">    &lt;-e.ready <span class="comment">// wait for ready condition</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> e.res.value, e.res.err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="goroutine-vs-thread">4. goroutine vs thread</h2>
+<p>线程是操作系统调度的基本单位，但是线程调度时的开销比较大，需要保存所有的寄存器，此后再恢复所有的寄存器。内核线程的栈大小通常为2MB，对大多数goroutine来说，2MB的栈是非常大的内存浪费。</p>
+<p>goroutine是在os线程上，由go runtime进行调度的，可以在不切换线程的前提下进行goroutine的切换。每一次os线程切换需要大约1us的时间，但是go调度器对goroutine进行切换时，需要的时间大约为0.2us，省去了80%的额外开销，因此goroutine也可以看作是一种轻量线程。</p>
+<p><img src="https://img.draveness.me/2020-02-05-15808864354586-goroutines-on-thread.png" /></p>
+<p>goroutine的调度是非抢占的，goroutine之间的关系不是竞争，而是合作(collaborative)，因此goroutine可以看作是协程(coroutine)的一种。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/13/chat-server/" rel="prev" title="Build a Chat Server Using Golang">
+      <i class="fa fa-chevron-left"></i> Build a Chat Server Using Golang
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%B1%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">1. 弱一致性模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sync.once"><span class="nav-number">2.</span> <span class="nav-text">2. sync.Once</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#sync.once%E4%BD%BF%E7%94%A8"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 sync.Once使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sync.once%E6%BA%90%E7%A0%81"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 sync.Once源码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E9%9D%9E%E9%98%BB%E5%A1%9E%E7%BC%93%E5%AD%98%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">3. 并发非阻塞缓存的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#goroutine-vs-thread"><span class="nav-number">4.</span> <span class="nav-text">4. goroutine vs thread</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">TimeSea05</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TimeSea05</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
