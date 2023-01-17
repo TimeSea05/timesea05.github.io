@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"timesea05.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="12.1 reflect.TypeOf, reflect.ValueOf go标准库reflect中定义了两个重要的类型：reflect.Type和reflect.Value。这两个interface类型分别对应interface value的dynamic type和dynamic value. 下面是一段示例代码： 1234t :&#x3D; reflect.TypeOf(3)fmt.Println(t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gopl Note: Chapter 12">
+<meta property="og:url" content="http://timesea05.github.io/2023/01/17/gopl-chpt12/index.html">
+<meta property="og:site_name" content="Blog of TimeSea05">
+<meta property="og:description" content="12.1 reflect.TypeOf, reflect.ValueOf go标准库reflect中定义了两个重要的类型：reflect.Type和reflect.Value。这两个interface类型分别对应interface value的dynamic type和dynamic value. 下面是一段示例代码： 1234t :&#x3D; reflect.TypeOf(3)fmt.Println(t">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-01-17T12:58:34.444Z">
+<meta property="article:modified_time" content="2023-01-17T12:59:29.114Z">
+<meta property="article:author" content="TimeSea05">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://timesea05.github.io/2023/01/17/gopl-chpt12/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>Gopl Note: Chapter 12 | Blog of TimeSea05</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog of TimeSea05</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/17/gopl-chpt12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TimeSea05">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog of TimeSea05">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Gopl Note: Chapter 12
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-17 20:58:34 / Modified: 20:59:29" itemprop="dateCreated datePublished" datetime="2023-01-17T20:58:34+08:00">2023-01-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="reflect.typeof-reflect.valueof">12.1 reflect.TypeOf, reflect.ValueOf</h3>
+<p>go标准库reflect中定义了两个重要的类型：<code>reflect.Type</code>和<code>reflect.Value</code>。这两个interface类型分别对应interface value的dynamic type和dynamic value.</p>
+<p>下面是一段示例代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">t := reflect.TypeOf(<span class="number">3</span>)</span><br><span class="line">fmt.Println(t)</span><br><span class="line">v := reflect.ValueOf(<span class="number">3</span>)</span><br><span class="line">fmt.Println(v)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">int</span><br><span class="line">3</span><br></pre></td></tr></table></figure>
+<p><code>reflect.TypeOf</code>接收<code>interface&#123;&#125;</code>类型作为参数，返回<code>reflect.Type</code>类型。在将任何值传入<code>reflect.TypeOf</code>时，发生了隐式类型转换。在这个例子中，将int类型的3传入后，<code>reflect.TypeOf</code>中得到一个<code>interface&#123;&#125;</code>类型的值，其中它的dynamic type为int，dynamic value为3。</p>
+<p><code>reflect.TypeOf</code>的返回值代表参数的类型。<code>reflect.Type</code>已经实现了<code>fmt.Stringer</code>接口，调用<code>fmt.Println</code>可以直接打印出类型信息。</p>
+<p><code>reflect.ValueOf</code>同样也是接收<code>interface&#123;&#125;</code>类型作为参数，返回<code>reflect.Value</code>类型，代表传入值在隐式类型转换后的dynamic value.</p>
+<h3 id="reflect.value类型的方法">12.2 reflect.Value类型的方法</h3>
+<p><strong>func (v Value) Int() int64</strong></p>
+<p><strong>func (v Value) Bool() bool</strong></p>
+<p><strong>...</strong></p>
+<p>返回 <code>reflect.Value</code>的 underlying value，如果调用的方法和对应的类型不匹配，会发生panic：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x := <span class="number">2</span></span><br><span class="line">d := reflect.ValueOf(x)</span><br><span class="line">fmt.Println(d.Int())</span><br><span class="line">fmt.Println(d.Bool())</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2</span><br><span class="line">panic: reflect: call of reflect.Value.Bool on int Value</span><br></pre></td></tr></table></figure>
+<p><strong>func (v Value) String() string</strong></p>
+<p><code>reflect.Value</code>类型实现了<code>fmt.Stringer</code>方法，将<code>reflect.Value</code>的值转换成string类型，然后返回</p>
+<p>除了当<code>reflect.Value</code>对应的值为string类型时，<code>String</code>方法会返回对应的字符串，在其他时候，<code>String</code>方法只会返回对应的类型信息。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">v := reflect.ValueOf(<span class="number">3</span>)</span><br><span class="line">fmt.Println(v.String())</span><br><span class="line">v = reflect.ValueOf(<span class="string">&quot;Hello, world&quot;</span>)</span><br><span class="line">fmt.Println(v.String())</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;int Value&gt;</span><br><span class="line">Hello, world</span><br></pre></td></tr></table></figure>
+<p><strong>func (v Value) Type() Type</strong></p>
+<p>返回<code>reflect.Value</code>值的类型信息</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">v := reflect.ValueOf(<span class="number">3</span>)</span><br><span class="line">t := v.Type()</span><br><span class="line">fmt.Println(t)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int</span><br></pre></td></tr></table></figure>
+<p><strong>func (v Value) Interface() (i any)</strong></p>
+<p><code>Interface</code>方法将<code>reflect.Value</code>当前的值转换成<code>interface&#123;&#125;</code> 类型返回，相当于<code>reflect.ValueOf</code>的逆运算。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">v := reflect.ValueOf(<span class="number">3</span>)</span><br><span class="line">x := v.Interface()</span><br><span class="line">i := x.(<span class="type">int</span>)</span><br><span class="line">fmt.Println(i)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">3</span><br></pre></td></tr></table></figure>
+<p><strong>func (v Value) Kind() Kind</strong></p>
+<p><code>Kind</code>方法返回<code>reflect.Value</code>的类型。尽管go中变量的类型有无穷多，但是它们的类型却是有限的。</p>
+<ul>
+<li><p>basic types: <code>Bool</code>, <code>String</code> and all the numbers</p></li>
+<li>aggregate types: <code>Array</code>, <code>Struct</code></li>
+<li><p>reference types: <code>Chan</code>, <code>Func</code>, <code>Ptr</code>, <code>Slice</code> and <code>Map</code></p></li>
+<li><p><code>Invalid</code>: no value at all (zero value of a <code>reflect.value</code>)</p></li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> v reflect.Value</span><br><span class="line">fmt.Println(v.Kind())</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">invalid</span><br></pre></td></tr></table></figure>
+<p>Gopl中的示例代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// formatAtom formats a value without inspecting its internal structure.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">formatAtom</span><span class="params">(v reflect.Value)</span></span> <span class="type">string</span> &#123;</span><br><span class="line">  <span class="keyword">switch</span> v.Kind() &#123;</span><br><span class="line">  <span class="keyword">case</span> reflect.Invalid:</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;invalid&quot;</span></span><br><span class="line">  <span class="keyword">case</span> reflect.Int, reflect.Int8, reflect.Int16,</span><br><span class="line">    reflect.Int32, reflect.Int64:</span><br><span class="line">    <span class="keyword">return</span> strconv.FormatInt(v.Int(), <span class="number">10</span>)</span><br><span class="line">  <span class="keyword">case</span> reflect.Uint, reflect.Uint8, reflect.Uint16,</span><br><span class="line">    reflect.Uint32, reflect.Uint64, reflect.Uintptr:</span><br><span class="line">    <span class="keyword">return</span> strconv.FormatUint(v.Uint(), <span class="number">10</span>)</span><br><span class="line">  <span class="comment">// ...floating-point and complex cases omitted for brevity...</span></span><br><span class="line">  <span class="keyword">case</span> reflect.Bool:</span><br><span class="line">    <span class="keyword">return</span> strconv.FormatBool(v.Bool())</span><br><span class="line">  <span class="keyword">case</span> reflect.String:</span><br><span class="line">    <span class="keyword">return</span> strconv.Quote(v.String())</span><br><span class="line">  <span class="keyword">case</span> reflect.Chan, reflect.Func, reflect.Ptr, reflect.Slice, reflect.Map:</span><br><span class="line">    <span class="keyword">return</span> v.Type().String() + <span class="string">&quot; 0x&quot;</span> +</span><br><span class="line">      strconv.FormatUint(<span class="type">uint64</span>(v.Pointer()), <span class="number">16</span>)</span><br><span class="line">  <span class="keyword">default</span>: <span class="comment">// reflect.Array, reflect.Struct, reflect.Interface</span></span><br><span class="line">    <span class="keyword">return</span> v.Type().String() + <span class="string">&quot; value&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>func (v Value) CanAddr() bool</strong></p>
+<p><strong>func (v Value) Addr() Value</strong></p>
+<p><code>CanAddr</code>方法用来判断<code>reflect.Value</code>类型是否可以寻址。</p>
+<p>示例程序如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x := <span class="number">2</span></span><br><span class="line">a := reflect.ValueOf(<span class="number">2</span>)</span><br><span class="line">b := reflect.ValueOf(x)</span><br><span class="line">c := reflect.ValueOf(&amp;x)</span><br><span class="line">d := c.Elem()</span><br><span class="line"></span><br><span class="line">fmt.Println(a.CanAddr())</span><br><span class="line">fmt.Println(b.CanAddr())</span><br><span class="line">fmt.Println(c.CanAddr())</span><br><span class="line">fmt.Println(d.CanAddr())</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">false</span><br><span class="line">false</span><br><span class="line">false</span><br><span class="line">true</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>a</code>是不可寻址的，<code>a</code>中的值只是整数2的拷贝</li>
+<li>同样的，<code>b</code>也是不可寻址的，<code>b</code>中的值只是<code>x</code>的拷贝</li>
+<li><p><code>c</code>也是不可寻址的，<code>c</code>中的值只是 <code>&amp;x</code>的拷贝</p></li>
+<li><p><code>d</code> 是由<code>c</code>中的值解引用得到的，指向一个变量，因此<code>d</code>是可寻址的</p></li>
+</ul>
+<p><code>Addr</code>返回一个指向<code>v</code>中元素的指针，返回类型仍然为<code>reflect.Value</code>. 如果<code>v</code>是不可寻址的，那么调用<code>Addr</code>方法会导致panic。</p>
+<p>下面是一个示例程序：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x := <span class="number">2</span></span><br><span class="line">d := reflect.ValueOf(&amp;x).Elem()</span><br><span class="line">px := d.Addr().Interface().(*<span class="type">int</span>)</span><br><span class="line">*px = <span class="number">3</span></span><br><span class="line">fmt.Println(x)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">3</span><br></pre></td></tr></table></figure>
+<p>上面的代码通过可取地址的<code>reflect.Value</code>类型来访问原来的变量。首先调用<code>Addr</code>方法，它返回一个<code>Value</code>，这个<code>Value</code>里面保存了指向变量的指针。此后在<code>Value</code>上调用<code>Interface</code>方法，将其转换成<code>interface&#123;&#125;</code>类型；最后使用类型断言，将上一步获得的<code>interface&#123;&#125;</code>类型转换成 *int 类型。</p>
+<p>在上面过程中，需要注意的是，调用<code>Addr</code>方法时，一定要判断<code>Value</code>是否可寻址，如果对不能寻址的<code>Value</code>调用该方法，会导致panic；另外使用类型断言时，也要确定好变量的类型，否则也会导致panic。</p>
+<p><strong>func (v Value) CanSet() bool</strong></p>
+<p><strong>func (v Value) Set(x Value)</strong></p>
+<p><code>CanSet</code>返回一个<code>reflect.Value</code>类型是否可以用<code>Set</code>方法进行赋值，如果返回false, 使用<code>Set</code>进行赋值会导致panic。</p>
+<p><code>Set</code>方法可以用来更新可以寻址的<code>reflect.Value</code>. 有了<code>Set</code>方法，我们便不用向上面那样复杂地去更新可寻址<code>Value</code>的值了：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x := <span class="number">2</span></span><br><span class="line">d := reflect.ValueOf(&amp;x).Elem()</span><br><span class="line">d.Set(reflect.ValueOf(<span class="number">3</span>))</span><br><span class="line">fmt.Println(x)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">3</span><br></pre></td></tr></table></figure>
+<p>在使用<code>Set</code>方法时，一定要注意是否可以赋值，如果尝试将一个 int64 类型的值通过<code>Set</code>赋给一个 int 类型的值，则会出现panic：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x := <span class="number">2</span></span><br><span class="line">d := reflect.ValueOf(&amp;x).Elem()</span><br><span class="line">d.Set(reflect.ValueOf(<span class="type">int64</span>(<span class="number">3</span>)))</span><br><span class="line">fmt.Println(x)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">panic: reflect.Set: value of type int64 is not assignable to type int</span><br></pre></td></tr></table></figure>
+<p>如果对不可寻址的<code>reflect.Value</code>类型使用<code>Set</code>，同样会导致panic：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x := <span class="number">2</span></span><br><span class="line">d := reflect.ValueOf(x)</span><br><span class="line">d.Set(reflect.ValueOf(<span class="number">3</span>))</span><br><span class="line">fmt.Println(x)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">panic: reflect: reflect.Value.Set using unaddressable value</span><br></pre></td></tr></table></figure>
+<p><strong>func (v Value) SetInt(x int64)</strong></p>
+<p><strong>func (v Value) SetString(x string)</strong></p>
+<p><strong>...</strong></p>
+<p>上面的set函数可以理解为特定类型的Set，如果赋值的类型和<code>Value</code>类型不一致，那么也会出现panic。</p>
+<p>general的<code>Set</code>方法，和此处特定类型的set方法，有一点不同的地方就是特定类型的方法无法对<code>interface&#123;&#125;</code>类型的方法进行赋值，会导致panic，而<code>Set</code>不会：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> x <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">d := reflect.ValueOf(&amp;x).Elem()</span><br><span class="line">d.Set(reflect.ValueOf(<span class="number">3</span>))</span><br><span class="line">fmt.Println(x)</span><br><span class="line">d.SetInt(<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">3</span><br><span class="line">panic: reflect: call of reflect.Value.SetInt on interface Value</span><br></pre></td></tr></table></figure>
+<p><strong>func (v Value) Index(i int) Value</strong></p>
+<p><code>Index</code>方法返回切片或者数组的第 i 个元素，如果<code>reflect.Value</code>的类型不是切片和数组，或者 i 的值越界，都会导致panic。</p>
+<p><strong>func (v Value) NumField() int</strong></p>
+<p>NumField returns the number of fields in the struct v. It panics if v's Kind is not Struct.</p>
+<p><strong>func (v Value) Field(i int) Value</strong></p>
+<p><code>Field</code>方法返回结构体的第 i 个字段，如果 i 越界了，或者<code>reflect.Value</code>的类型不是struct类型，会导致panic。</p>
+<p><strong>func (v Value) MapKeys() []Value</strong></p>
+<p><code>MapKeys</code> returns a slice containing all the keys present in the map, in unspecified order. It panics if v's Kind is not Map. It returns an empty slice if v represents a nil map.</p>
+<p><strong>func (v Value) MapIndex(key Value) Value</strong></p>
+<p><code>MapIndex</code> returns the value associated with key in the map v. It panics if v's Kind is not Map. It returns the zero Value if key is not found in the map or if v represents a nil map. As in Go, the key's value must be assignable to the map's key type.</p>
+<p><strong>func (v Value) Method(i int) Value</strong></p>
+<p>Method returns a function value corresponding to v's i'th method. The arguments to a Call on the returned function should not include a receiver; the returned function will always use v as the receiver. Method panics if i is out of range or if v is a nil interface value.</p>
+<h3 id="获取结构体-field-的-tag">12.3 获取结构体 field 的 tag</h3>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Point <span class="keyword">struct</span> &#123;</span><br><span class="line">  X <span class="type">int</span> <span class="string">`json:&quot;x_coordinate&quot;`</span></span><br><span class="line">  Y <span class="type">int</span> <span class="string">`json:&quot;y_coordinate&quot;`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  p := Point&#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line">  rp := reflect.ValueOf(p)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; rp.NumField(); i++ &#123;</span><br><span class="line">    fmt.Println(rp.Type().Field(i).Tag.Get(<span class="string">&quot;json&quot;</span>))</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">x_coordinate</span><br><span class="line">y_coordinate</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/15/gopl-chpt9/" rel="prev" title="Gopl Note: Chapter 9">
+      <i class="fa fa-chevron-left"></i> Gopl Note: Chapter 9
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#reflect.typeof-reflect.valueof"><span class="nav-number">1.</span> <span class="nav-text">12.1 reflect.TypeOf, reflect.ValueOf</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reflect.value%E7%B1%BB%E5%9E%8B%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">12.2 reflect.Value类型的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E7%BB%93%E6%9E%84%E4%BD%93-field-%E7%9A%84-tag"><span class="nav-number">3.</span> <span class="nav-text">12.3 获取结构体 field 的 tag</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">TimeSea05</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TimeSea05</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
