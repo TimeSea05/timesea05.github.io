@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"timesea05.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"hide","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="k8s Operator 开发随笔 最近在和李老师、朱师兄一起开发Rhino这个项目，项目地址在这里。Rhino是为HPC开发者提供的一套框架，方便HPC开发者将自己开发的MPI应用部署到 k8s 集群中。目前我主要开发的是Operator项目，该项目是基于kubebuilder 这个脚手架的，在这篇文章中记录一些讨论的会议纪要，和自己的一些体会。 关于Operator开发的背景知识，可以参考这一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s Operator 开发随笔">
+<meta property="og:url" content="http://timesea05.github.io/2023/01/31/k8s-operator-%E5%BC%80%E5%8F%91%E9%9A%8F%E7%AC%94/index.html">
+<meta property="og:site_name" content="Blog of TimeSea05">
+<meta property="og:description" content="k8s Operator 开发随笔 最近在和李老师、朱师兄一起开发Rhino这个项目，项目地址在这里。Rhino是为HPC开发者提供的一套框架，方便HPC开发者将自己开发的MPI应用部署到 k8s 集群中。目前我主要开发的是Operator项目，该项目是基于kubebuilder 这个脚手架的，在这篇文章中记录一些讨论的会议纪要，和自己的一些体会。 关于Operator开发的背景知识，可以参考这一">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://i.328888.xyz/2023/01/31/86qVL.png">
+<meta property="og:image" content="https://i.328888.xyz/2023/01/31/86ujp.png">
+<meta property="article:published_time" content="2023-01-31T12:27:40.634Z">
+<meta property="article:modified_time" content="2023-01-31T12:29:02.764Z">
+<meta property="article:author" content="TimeSea05">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.328888.xyz/2023/01/31/86qVL.png">
+
+<link rel="canonical" href="http://timesea05.github.io/2023/01/31/k8s-operator-%E5%BC%80%E5%8F%91%E9%9A%8F%E7%AC%94/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>k8s Operator 开发随笔 | Blog of TimeSea05</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog of TimeSea05</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/31/k8s-operator-%E5%BC%80%E5%8F%91%E9%9A%8F%E7%AC%94/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TimeSea05">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog of TimeSea05">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          k8s Operator 开发随笔
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-31 20:27:40 / Modified: 20:29:02" itemprop="dateCreated datePublished" datetime="2023-01-31T20:27:40+08:00">2023-01-31</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="k8s-operator-开发随笔">k8s Operator 开发随笔</h1>
+<p>最近在和李老师、朱师兄一起开发Rhino这个项目，项目地址在<a target="_blank" rel="noopener" href="https://github.com/OpenRHINO">这里</a>。Rhino是为HPC开发者提供的一套框架，方便HPC开发者将自己开发的MPI应用部署到 k8s 集群中。目前我主要开发的是Operator项目，该项目是基于kubebuilder 这个脚手架的，在这篇文章中记录一些讨论的会议纪要，和自己的一些体会。</p>
+<p>关于Operator开发的背景知识，可以参考这一篇文章：<a target="_blank" rel="noopener" href="https://xie.infoq.cn/article/e3345fdc1c7390a779231e799">还在手写 Operator？是时候使用 Kubebuilder 了</a>。</p>
+<h2 id="声明式api与operator模式原理">1. 声明式API与Operator模式原理</h2>
+<p><img src="https://i.328888.xyz/2023/01/31/86qVL.png" /></p>
+<p>当我们要创建资源(比如使用kubectl apply yaml文件，或者调用k8s提供的API创建资源)时，k8s返回资源创建成功，这个创建成功是什么意思呢？</p>
+<p>我们要创建资源时，请求都会先发送到API server；API server收到请求之后，如果系统中没有这个资源，那么就会将资源创建出来：向数据库etcd中写一条记录，记录当前资源的期望状态，之后etcd会向API server发送确认，表示这条记录已经成功记录下来，此时API server会向客户端返回资源创建成功。</p>
+<p>也就是说，当API server返回资源创建成功之后，并不是真正创建成功了，而是表明这条记录写到了etcd数据库里面。</p>
+<h2 id="rhinojob-工作原理">2. RhinoJob 工作原理</h2>
+<p>关于RhinoJob的工作原理，更详细的可以看<a target="_blank" rel="noopener" href="https://c8s9wpsorl.feishu.cn/docx/doxcn7OP4K8EN2qVrXXTIyXhK6g">这篇文章</a>。</p>
+<p>RhinoJob的任务是在k8s上将MPI运算任务启动起来。首先Reconciler会启动一个Launcher Job，来协调和管理MPI工作节点；当Launcher Job启动成功后，Reconciler会根据提交任务的并行度(<code>Parallelism</code>字段)来创建Workers Job，运算结束后，Launcher Job 和 Workers Job状态会发生改变，此时再次触发Reconciler，将对应的Job，Pod等删除，并据此修改RhinoJob的状态。</p>
+<h2 id="技术细节实现">3. 技术细节实现</h2>
+<h3 id="ttl">3.1 TTL</h3>
+<p>目前Rhino Operator中的CRD(Custom Resource Definition)为<code>RhinoJob</code>，其中包含<code>TTL</code>字段，表示在<code>TTL</code>秒后，之前创建的CR应该被销毁，但是这是如何实现的呢？</p>
+<p>来看一下处理TTL的代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> *rhinojob.Spec.TTL &gt; <span class="number">0</span> &#123;</span><br><span class="line">  ttl_left := rhinojob.CreationTimestamp.Add(time.Second * time.Duration(*rhinojob.Spec.TTL)).Sub(time.Now())</span><br><span class="line">  <span class="keyword">if</span> ttl_left &gt; <span class="number">0</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ctrl.Result&#123;RequeueAfter: ttl_left&#125;, <span class="literal">nil</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    r.Delete(ctx, &amp;rhinojob)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>每次触发Reconcile逻辑，都会对TLL进行处理，计算CR剩余存活时间。如果<code>ttl_left &gt; 0</code>，那么返回<code>ctrl.Result&#123;RequeueAfter: ttl_left&#125;</code>这个结构体；否则调用k8s API删除资源。</p>
+<p>上面的<code>ctrl.Result</code>的结构体是用来干什么的呢？先来看一下Reconciler的工作逻辑：</p>
+<p><img src="https://i.328888.xyz/2023/01/31/86ujp.png" /></p>
+<p>Reconciler 处理的事件按照队列排列，也就是图中的<code>workQueue</code>，Reconciler处理完一个事件之后，再从队列中取出下一个事件，进行处理。</p>
+<p>回到TTL的处理逻辑上来，<code>ctrl.Result</code>结构体中<code>RequeueAfter: ttl_left</code>字段的意思就是，在<code>ttl_left</code>时间后，将事件放到<code>WorkQueue</code>中，让Reconciler处理。这样我们就能实现在TTL事件后，将CR删除，不会出现程序一直跑一直跑，CR不会被删除的情况。</p>
+<p>同样的，由于Reconciler是用队列来处理事件的，并发只有1，所以在Reconciler中调用<code>time.Sleep</code>是非常糟糕的设计，这会导致后面所有的事件都会被阻塞在这个队列中，无法被Reconciler处理。</p>
+<h3 id="scheme">3.2 Scheme</h3>
+<p>Scheme实现的是Go struct 和 Custom Resource的对应，和Web后端开发中的model非常相似，其实就是数据库中表的结构。使用kubectl apply的yaml文件的结构，就可以转换成对应的结构体，实现上面所说的对应。</p>
+<h3 id="对cr的监视">3.3 对CR的监视</h3>
+<p>我们定义的CR的状态发生改变时，会触发Reconciler逻辑，但这个是如何实现的呢？难不成有一个东西一直在watch？</p>
+<p>我们使用kubebuilder搭建的Custom Controller会与k8s的API Server建立HTTP长连接，当有与我们定义的CR相关的资源状态变化时，API Server会向Controller发送一个Response，此后触发一系列逻辑，最终将事件加入到WorkQueue，之后触发Reconciler。</p>
+<h3 id="launcher和worker资源状态变化为何会触发reconciler">3.4 launcher和worker资源状态变化为何会触发Reconciler</h3>
+<p>为什么要设计成这样，让launcher job和workers job(都是k8s job)状态变化也会触发Reconciler？<a target="_blank" rel="noopener" href="https://github.com/OpenRHINO/RHINO-Operator/blob/0b8d8231e4e612c8484c5c70d211ac823c255005/controllers/rhinojob_controller.go#L130">Link</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> errGetLauncherJob != <span class="literal">nil</span> || errGetWorkersJob != <span class="literal">nil</span> &#123;</span><br><span class="line">  rhinojob.Status.JobStatus = rhinooprapiv1alpha1.Pending</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> foundWorkersJob.Status.Failed+foundLauncherJob.Status.Failed &gt; <span class="number">0</span> &#123;</span><br><span class="line">    rhinojob.Status.JobStatus = rhinooprapiv1alpha1.Failed</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> foundWorkersJob.Status.Succeeded == *rhinojob.Spec.Parallelism &amp;&amp; foundLauncherJob.Status.Succeeded == <span class="number">1</span> &#123;</span><br><span class="line">    rhinojob.Status.JobStatus = rhinooprapiv1alpha1.Completed</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    rhinojob.Status.JobStatus = rhinooprapiv1alpha1.Running</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> err := r.Status().Update(ctx, &amp;rhinojob); err != <span class="literal">nil</span> &#123;</span><br><span class="line">  logger.Error(err, <span class="string">&quot;Failed to update RhinoJob status&quot;</span>)</span><br><span class="line">  <span class="keyword">return</span> ctrl.Result&#123;&#125;, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从代码可以看出，RhinoJob的状态取决于launcher job和workers job的状态，它们的每一次状态变化，都有可能触发RhinoJob的状态变化。</p>
+<p>那么这是如何实现的呢？<a target="_blank" rel="noopener" href="https://github.com/OpenRHINO/RHINO-Operator/blob/0b8d8231e4e612c8484c5c70d211ac823c255005/controllers/rhinojob_controller.go#L218">Link</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ctrl.SetControllerReference(rj, job, r.Scheme)</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *RhinoJobReconciler)</span></span> SetupWithManager(mgr ctrl.Manager) <span class="type">error</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> ctrl.NewControllerManagedBy(mgr).</span><br><span class="line">		For(&amp;rhinooprapiv1alpha1.RhinoJob&#123;&#125;).</span><br><span class="line">		Owns(&amp;kbatchv1.Job&#123;&#125;).</span><br><span class="line">		Complete(r)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>只需要在创建这些job时，调用k8s runtime提供的API，并在实现<code>SetupWithManager</code>方法时，调用<code>Owns</code>方法即可。</p>
+<h3 id="reconciler-返回-err-后发生了什么">3.5 Reconciler 返回 err 后发生了什么</h3>
+<p>当Reconciler执行出错时，会返回err。如果返回<code>nil</code>，表示Reconcile逻辑执行完毕；返回非<code>nil</code> error时，会让事件重新在队列里面排队。</p>
+<h3 id="什么情况下reconciler可以忽略执行过程中的-err">3.6 什么情况下Reconciler可以忽略执行过程中的 err</h3>
+<p><a target="_blank" rel="noopener" href="https://github.com/OpenRHINO/RHINO-Operator/blob/0b8d8231e4e612c8484c5c70d211ac823c255005/controllers/rhinojob_controller.go#L66">Link</a></p>
+<p>当Reconciler中调用Get方法获取正在运行的RhinoJob CR时，如果是<code>IsNotFound</code>类型的错误的话，我们不对该错误进行处理，因为这种错误通常是由资源被删除(主动删除；超时触发Reconciler被删除)导致的，是正常情况，我们不需要对其进行处理。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> errors.IsNotFound(err) &#123;</span><br><span class="line">  logger.Info(<span class="string">&quot;Resource not found. Ignoring since object must be deleted&quot;</span>)</span><br><span class="line">  <span class="keyword">return</span> ctrl.Result&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/17/gopl-chpt12/" rel="prev" title="Gopl Note: Chapter 12">
+      <i class="fa fa-chevron-left"></i> Gopl Note: Chapter 12
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#k8s-operator-%E5%BC%80%E5%8F%91%E9%9A%8F%E7%AC%94"><span class="nav-number">1.</span> <span class="nav-text">k8s Operator 开发随笔</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A3%B0%E6%98%8E%E5%BC%8Fapi%E4%B8%8Eoperator%E6%A8%A1%E5%BC%8F%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">1. 声明式API与Operator模式原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rhinojob-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">2. RhinoJob 工作原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E7%BB%86%E8%8A%82%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.3.</span> <span class="nav-text">3. 技术细节实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ttl"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.1 TTL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scheme"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.2 Scheme</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9cr%E7%9A%84%E7%9B%91%E8%A7%86"><span class="nav-number">1.3.3.</span> <span class="nav-text">3.3 对CR的监视</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#launcher%E5%92%8Cworker%E8%B5%84%E6%BA%90%E7%8A%B6%E6%80%81%E5%8F%98%E5%8C%96%E4%B8%BA%E4%BD%95%E4%BC%9A%E8%A7%A6%E5%8F%91reconciler"><span class="nav-number">1.3.4.</span> <span class="nav-text">3.4 launcher和worker资源状态变化为何会触发Reconciler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reconciler-%E8%BF%94%E5%9B%9E-err-%E5%90%8E%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">1.3.5.</span> <span class="nav-text">3.5 Reconciler 返回 err 后发生了什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%83%85%E5%86%B5%E4%B8%8Breconciler%E5%8F%AF%E4%BB%A5%E5%BF%BD%E7%95%A5%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84-err"><span class="nav-number">1.3.6.</span> <span class="nav-text">3.6 什么情况下Reconciler可以忽略执行过程中的 err</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">TimeSea05</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TimeSea05</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
