@@ -145,6 +145,86 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/02/leetcode-strange-runtime-error/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TimeSea05">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog of TimeSea05">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/01/02/leetcode-strange-runtime-error/" class="post-title-link" itemprop="url">Leetcode: strange runtime error</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-01-02 19:43:12" itemprop="dateCreated datePublished" datetime="2023-01-02T19:43:12+08:00">2023-01-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2023-01-13 15:33:45" itemprop="dateModified" datetime="2023-01-13T15:33:45+08:00">2023-01-13</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>向Leetcode <a target="_blank" rel="noopener" href="https://leetcode.cn/problems/can-place-flowers/">435：种花问题</a> 提交答案时，Leetcode平台出现了诡异的runtime error：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Line 1034: Char 34: runtime error: addition of unsigned offset to 0x602000000a50 overflowed to 0x602000000a4c (stl_vector.h)</span><br><span class="line">SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/bin/../lib/gcc/x86_64-linux-gnu/9/../../../../include/c++/9/bits/stl_vector.h:1043:34</span><br></pre></td></tr></table></figure>
+<p>测试用例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[0,1,0]</span><br><span class="line">1</span><br></pre></td></tr></table></figure>
+<p>提交的源代码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">canPlaceFlowers</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; flowerbed, <span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> placed = <span class="number">0</span>;</span><br><span class="line">  <span class="type">bool</span> canPlace = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; flowerbed.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (flowerbed[i] == <span class="number">0</span>) &#123;</span><br><span class="line">      canPlace = <span class="literal">false</span>;</span><br><span class="line">      <span class="keyword">if</span> (flowerbed.<span class="built_in">size</span>() == <span class="number">1</span>) &#123;</span><br><span class="line">        canPlace = <span class="literal">true</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (i == <span class="number">0</span> &amp;&amp; flowerbed[i+<span class="number">1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">        canPlace = <span class="literal">true</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (i == flowerbed.<span class="built_in">size</span>() - <span class="number">1</span> &amp;&amp; flowerbed[i<span class="number">-1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">        canPlace = <span class="literal">true</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (flowerbed[i<span class="number">-1</span>] == <span class="number">0</span> &amp;&amp; flowerbed[i+<span class="number">1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">        canPlace = <span class="literal">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (canPlace) &#123;</span><br><span class="line">        flowerbed[i] = <span class="number">1</span>;</span><br><span class="line">        placed++;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; </span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> placed &gt;= n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实际上这个代码已经修改过一遍了，但是还是出现了runtime error，在本地用g++编译输出正确答案，没有出现runtime error。</p>
+<p>Google一下错误日志后发现，可能是vscode的C++插件对代码的检查不严格，于是换用Visual Studio运行该代码，果然出现了错误：</p>
+<p><a target="_blank" rel="noopener" href="https://imgloc.com/i/t2ZiV"><img src="https://i.328888.xyz/2023/01/02/t2ZiV.png" alt="t2ZiV.png" style="zoom: 80%;" /></a></p>
+<p>点击忽略，可以看到出现未处理的异常：</p>
+<p><img src="https://i.328888.xyz/2023/01/02/t2t3k.png" alt="t2t3k.png" style="zoom:80%;" /></p>
+<p>查看调用堆栈，找到出现异常的位置：</p>
+<p><img src="https://i.328888.xyz/2023/01/02/t2bK8.png" alt="t2bK8.png" style="zoom: 60%;" /></p>
+<p>可以看到程序停在第20行的位置，此时局部变量<code>i</code>的值为0，访问vector数组的索引为-1，由于vector的索引为无符号数，此时直接溢出，变成一个非常大的值，所以程序报错<code>addition of unsigned offset to 0x602000000a50 overflowed to 0x602000000a4c</code>，将程序重写后，错误消失，通过。重写后的程序如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">canPlaceFlowers</span><span class="params">(vector&lt;<span class="type">int</span>&gt;&amp; flowerbed, <span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">  <span class="type">int</span> placed = <span class="number">0</span>;</span><br><span class="line">  <span class="type">bool</span> canPlace = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; flowerbed.<span class="built_in">size</span>(); i++) &#123;</span><br><span class="line">    canPlace = <span class="literal">false</span>; </span><br><span class="line">    <span class="keyword">if</span> (flowerbed[i] == <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (i == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (flowerbed.<span class="built_in">size</span>() == <span class="number">1</span>) &#123;</span><br><span class="line">          canPlace = <span class="literal">true</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (flowerbed[i+<span class="number">1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">          canPlace = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (i == flowerbed.<span class="built_in">size</span>() - <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (flowerbed[i<span class="number">-1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">          canPlace = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (flowerbed[i<span class="number">-1</span>] == <span class="number">0</span> &amp;&amp; flowerbed[i+<span class="number">1</span>] == <span class="number">0</span>) &#123;</span><br><span class="line">          canPlace = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (canPlace) &#123;</span><br><span class="line">        flowerbed[i] = <span class="number">1</span>;</span><br><span class="line">        placed++;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> placed &gt;= n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>重写后的代码多了好几重判断，显得非常啰嗦。实际上可以通过在数组两侧都加上一个0作为padding，来避免进行复杂的检查。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/02/loop-variable-captured-by-func-literal/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -437,7 +517,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-count">13</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
