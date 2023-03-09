@@ -145,6 +145,93 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/03/09/dlv-debug-go-with-plugin/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="TimeSea05">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog of TimeSea05">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2023/03/09/dlv-debug-go-with-plugin/" class="post-title-link" itemprop="url">使用go-vscode插件debug 带plugin的程序</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2023-03-09 19:20:03" itemprop="dateCreated datePublished" datetime="2023-03-09T19:20:03+08:00">2023-03-09</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>使用VSCode的golang插件debug go程序是非常方便的，可以比较容易地实现查看变量名、断点调试、单步跟踪等功能。但是笔者最近在使用这个插件debug 需要用到go plugin的程序 （MIT 6.824 mapreduce lab）时，遇到了问题：无论怎么办，从plugin中加载函数都会失败，这让我百思不得其解。在翻阅无数stackoverflow帖子和github issues之后，终于找到了解决办法，便有了这篇博文。</p>
+<h2 id="问题复现">1. 问题复现</h2>
+<p>此处需要进行debug的go程序的文件名为<code>mrworker.go</code>，go插件在<code>launch.json</code>中给出的默认配置如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Launch file&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;go&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;debug&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;file&#125;&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>对其稍加修改，得到的配置文件如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Launch test&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;go&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;debug&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/src/main/mrworker.go&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;$&#123;workspaceFolder&#125;/src/main/wc.so&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line"><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br></pre></td></tr></table></figure>
+<p>程序<code>mrworker.go</code>需要接受一个命令行参数指定plugin，这里我选用<code>wc.so</code>。</p>
+<p>在加载<code>wc.so</code>时，会发现程序调用<code>plugin.Open</code>打开该插件时失败了：</p>
+<p><img src="https://i.328888.xyz/2023/03/09/oUB5c.png" /></p>
+<p>使用调试器打印错误信息如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">plugin was built with a different version of package runtime/internal/atomic</span><br></pre></td></tr></table></figure>
+<h2 id="错误原因">2. 错误原因</h2>
+<p>逛了很长时间的stackoverflow和github之后，才知道这个错误出现的原因：编译可执行文件和plugin的build flags不同。plugin的编译是用的MIT 6.824中给出的命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go build -race -buildmode=plugin ../mrapps/wc.go</span><br></pre></td></tr></table></figure>
+<p>但是dlv 编译可执行文件时的build flags无从知晓，在网上翻阅很多资料都没有找到。</p>
+<p>build flags的不一致导致上述错误的发生。</p>
+<h2 id="解决办法">3. 解决办法</h2>
+<p>我们无法获知dlv编译可执行文件时的build flags，那么我们可以自行编译，然后调试编译后的可执行文件。这里需要将dlv的模式从<code>debug</code>转成<code>exec</code>，表示debug可执行文件，同时在<code>launch.json</code>文件中添加<code>preLaunchTask</code>属性，表示在debug之前首先执行指定的任务，在这里就是用我们自己的flags编译插件和可执行文件了。修改之后的配置如下：</p>
+<p>launch.json:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Debug Worker&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;go&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;exec&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/src/main/mrworker&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;$&#123;workspaceFolder&#125;/src/main/wc.so&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;preLaunchTask&quot;</span><span class="punctuation">:</span> <span class="string">&quot;build mrworker and plugin binary&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;workspaceFolder&#125;/src/main&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>tasks.json:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;tasks&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;shell&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;label&quot;</span><span class="punctuation">:</span> <span class="string">&quot;build mrworker and plugin binary&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;command&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/usr/bin/zsh&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">        <span class="string">&quot;./build_mrworker_plugin.sh&quot;</span></span><br><span class="line">      <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      </span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2.0.0&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>tasks里面便是编译可执行文件和plugin的命令：</p>
+<p>build_mrworker_plugin.sh</p>
+<p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/zsh</span><br><span class="line">cd ./src/main</span><br><span class="line">go build -race -buildmode=plugin ../mrapps/wc.go</span><br><span class="line">go build -race mrworker.go</span><br></pre></td></tr></table></figure></p>
+<p>这样可以看到我们的程序可以正常加载plugin了：</p>
+<p><img src="https://i.328888.xyz/2023/03/09/on0QN.png" /></p>
+<p>尽管我们现在可以正常调试了，但是还是会遇到下面的问题：</p>
+<p><img src="https://i.328888.xyz/2023/03/09/onbRz.png" /></p>
+<p>在调试的过程中会看到左边侧栏会提示optimized function，这样的话有时候查看一些重要变量的值或者属性时会失败，解决这个问题只需要在编译可执行文件和plugin时加上编译选项<code>-gcflags="all=-N -l"</code> 即可。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/02/07/k8s-operator-test-use-existing-cluster/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1186,111 +1273,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://timesea05.github.io/2023/01/04/gopl-chpt5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="TimeSea05">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Blog of TimeSea05">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/01/04/gopl-chpt5/" class="post-title-link" itemprop="url">Gopl Note: Chapter 5</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2023-01-04 13:57:32" itemprop="dateCreated datePublished" datetime="2023-01-04T13:57:32+08:00">2023-01-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2023-01-13 15:33:24" itemprop="dateModified" datetime="2023-01-13T15:33:24+08:00">2023-01-13</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="可变参数">5.1 可变参数</h2>
-<p>在声明可变参数函数时，需要在参数列表的最后一个参数类型之前加上省略符号"..."，这表示该函数会接收任意数量的该类型参数。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">sum</span><span class="params">(vals ...<span class="type">int</span>)</span></span> <span class="type">int</span> &#123;</span><br><span class="line">  total := <span class="number">0</span></span><br><span class="line">  <span class="keyword">for</span> _, val := <span class="keyword">range</span> vals &#123;</span><br><span class="line">    total += val</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> total</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>此时<code>vals</code>可以看作是int类型的切片，sum可以接受任何数量的参数：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">fmt.Println(sum())</span><br><span class="line">fmt.Println(sum(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>))</span><br></pre></td></tr></table></figure>
-<p>如果向sum函数传递一个切片，那么在传递时，需要在最后一个参数后加上省略符：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">values := []<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;</span><br><span class="line">fmt.Println(sum(values...))</span><br></pre></td></tr></table></figure>
-<p>如果要传递一个数组，那么首先要把数组转换为切片：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">array := [...]<span class="type">int</span>&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;</span><br><span class="line">fmt.Println(sum(array[:]...))</span><br></pre></td></tr></table></figure>
-<p><strong>要注意的是</strong>，<code>[]int&#123;1, 2, 3, 4, 5&#125;</code><strong>是切片类型，而</strong><code>[...]int&#123;1, 2, 3, 4, 5&#125;</code> <strong>是数组类型</strong></p>
-<h2 id="defer">5.2 defer</h2>
-<p>defer语句通常用来处理成对的操作，如打开文件和关闭文件、加锁和释放锁。</p>
-<blockquote>
-<p>The function and argument expressions <strong>are evaluated when the statement is executed</strong>, but the actual call is <em>deferred</em> until the function that contains the defer statement has finished, <strong>whether normally, by executing a return statement or falling off the end, or abnormally, by panicking.</strong></p>
-</blockquote>
-<p>如处理文件时，可以采用defer机制：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">ReadFile</span><span class="params">(filename <span class="type">string</span>)</span></span> ([]<span class="type">byte</span>, <span class="type">error</span>) &#123;</span><br><span class="line">  f, err := os.Open(filename)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">defer</span> f.Close()</span><br><span class="line">  <span class="keyword">return</span> ReadAll(f)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="defer记录何时进入和退出函数">5.2.1 defer记录何时进入和退出函数</h3>
-<p>注意第一段加黑的字：<strong>The function and argument expressions are evaluated when the statement is executed</strong>，也就是说，在执行到defer语句时，函数和参数的表达式会被先计算出来，但是函数调用是被推迟的。如下面这个例子：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">bigSlowOperation</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">defer</span> trace(<span class="string">&quot;bigSlowOperation&quot;</span>)() <span class="comment">// don&#x27;t forget the extra parentheses</span></span><br><span class="line">  time.Sleep(<span class="number">10</span> * time.Second) <span class="comment">// simulate slow operation by sleeping</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">trace</span><span class="params">(msg <span class="type">string</span>)</span></span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">  start := time.Now()</span><br><span class="line">  log.Printf(<span class="string">&quot;enter %s&quot;</span>, msg)</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; </span><br><span class="line">    log.Printf(<span class="string">&quot;exit %s (%s)&quot;</span>, msg,time.Since(start)) </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出结果为：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2023/01/03 23:29:38 enter bigSlowOperation</span><br><span class="line">2023/01/03 23:29:49 exit bigSlowOperation (10.009113572s)</span><br></pre></td></tr></table></figure>
-<p>首先在进入函数<code>bigSlowOperation</code>时，defer语句中的表达式会先被计算出来，也就是调用<code>trace</code>计算出要被<em>推迟</em>调用的函数，此处这个被<em>推迟</em>调用的函数是<code>trace</code>返回的匿名函数。所以在开始时，调用<code>trace</code>函数，打印log，返回被<em>推迟</em>调用的函数，这个函数在<code>bigSlowOperation</code>执行结束后被调用，打印log，正好实现了记录函数被调用和调用完成的时间。</p>
-<h3 id="defer语句的调用顺序问题">5.2.2 defer语句的调用顺序问题</h3>
-<blockquote>
-<p>Any number of calls may be deferred; they are executed in the reverse of the order in which they were deferred.</p>
-</blockquote>
-<h3 id="defer语句修改函数返回值">5.2.3 defer语句修改函数返回值</h3>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">double</span><span class="params">(x <span class="type">int</span>)</span></span> (result <span class="type">int</span>) &#123;</span><br><span class="line">  <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; fmt.Printf(<span class="string">&quot;double(%d) = %d\n&quot;</span>, x,result) &#125;()</span><br><span class="line">  <span class="keyword">return</span> x + x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">_ = double(<span class="number">4</span>)</span><br></pre></td></tr></table></figure>
-<p>输出：</p>
-<blockquote>
-<p>"double(4) = 8"</p>
-</blockquote>
-<h3 id="避免在循环里使用defer语句">5.2.4 避免在循环里使用defer语句</h3>
-<p>在循环体中的defer语句需要特别注意，因为只有在函数执行完毕后，这些被延迟的函数才会执行。下面的代码会导致系统的文件描述符耗尽，因为在所有文件都被处理之前，没有文件会被关闭。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> _, filename := <span class="keyword">range</span> filenames &#123;</span><br><span class="line">  f, err := os.Open(filename)</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">defer</span> f.Close() <span class="comment">// <span class="doctag">NOTE:</span> risky; could run out of file descriptors</span></span><br><span class="line">  <span class="comment">// ...process f…</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="panic-recover">5.3 panic &amp;&amp; recover</h2>
-<p>go的panic机制类似于其他语言的异常机制，但是panic会引起程序的崩溃，因此panic一般用于严重的错误。对于大部分的错误和漏洞，应该使用go提供的错误机制。</p>
-<p>当panic异常发生时，程序会中断运行，执行当前goroutine中被defer延迟的函数，随后程序输出日志信息，包括panic value和堆栈跟踪信息。</p>
-<p>通常来说，不应该对panic做任何处理，但是有时我们可以从异常中恢复，或者说在程序崩溃前，做一些操作，如web服务器在运行时出现panic异常，应该在崩溃前把所有的连接都关闭，否则客户端会一直处于等待状态。</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Parse</span><span class="params">(input <span class="type">string</span>)</span></span> (s *Syntax, err <span class="type">error</span>) &#123;</span><br><span class="line">  <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> p := <span class="built_in">recover</span>(); p != <span class="literal">nil</span> &#123;</span><br><span class="line">      err = fmt.Errorf(<span class="string">&quot;internal error: %v&quot;</span>, p)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;()</span><br><span class="line">  <span class="comment">// ...parser...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1360,7 +1342,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-count">14</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
